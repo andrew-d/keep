@@ -1,0 +1,45 @@
+{
+  "name": "keep",
+  "version": "0.0.1",
+  "description": "Self-hosted Google Keep replacement",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andrew-d/keep"
+  },
+  "author": "Andrew Dunham <andrew@du.nham.ca>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andrew-d/keep/issues"
+  },
+  "homepage": "https://github.com/andrew-d/keep",
+  "devDependencies": {
+    "gulp-util": "~2.2.14",
+    "gulp": "~3.5.1",
+    "gulp-concat": "~2.1.7",
+    "gulp-uglify": "~0.2.0",
+    "gulp-watch": "~0.5.0",
+    "gulp-browserify": "~0.4.2",
+    "reactify": "~0.7.0",
+    "gulp-rename": "~0.2.2",
+    "gulp-replace": "~0.2.0",
+    "browserify": "~3.24.11",
+    "browserify-shim": "~3.2.2"
+  },
+  "dependencies": {
+    "react": "~0.8.0",
+    "jquery-browserify": "~1.8.1"
+  },
+  "browserify": {
+    "transform": ["browserify-shim", "reactify"]
+  },
+  "browser": {
+    "jquery": "./src/js/vendor/jquery-1.11.0.js"
+  },
+  "browserify-shim": {
+    "jquery": "$"
+  }
+}
