@@ -30,16 +30,8 @@
     "browserify-shim": "~3.2.2"
   },
   "dependencies": {
-    "react": "~0.8.0",
-    "jquery-browserify": "~1.8.1"
-  },
-  "browserify": {
-    "transform": ["browserify-shim", "reactify"]
-  },
-  "browser": {
-    "jquery": "./src/js/vendor/jquery-1.11.0.js"
+    "react": "~0.8.0"
   },
   "browserify-shim": {
-    "jquery": "$"
   }
 }
