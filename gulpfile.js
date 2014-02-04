@@ -91,4 +91,4 @@ gulp.task('watch', ['js', 'statics', 'lr-server'], function() {
 });
 
 // The default task (called when you run `gulp` by itself)
-gulp.task('default', ['js', 'statics', 'lr-server', 'watch']);
+gulp.task('default', ['js', 'statics', 'lr-server']);
