@@ -1,6 +1,11 @@
 /** @jsx React.DOM */
 var React = require('react');
 var pkg = require('../package.json');
-var $ = require('jquery');
 
-React.renderComponent(<h3>{pkg.name}, brought to you by React!</h3>, document.querySelectorAll("#application")[0]);
+var Application = require('./js/app.jsx')
+
+// Just render the main application to the DOM.
+React.renderComponent(
+    Application({}),
+    document.getElementById("application")
+);
