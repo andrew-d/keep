@@ -1,4 +1,5 @@
 /** @jsx React.DOM */
+var $     = require('jquery');
 var React = require('react');
 var pkg = require('../package.json');
 

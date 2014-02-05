@@ -9,7 +9,7 @@ var ItemList = React.createClass({
 
             </ul>
         );
-    },
+    }
 });
 
 

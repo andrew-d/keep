@@ -20,7 +20,7 @@ var EditBox = React.createClass({
               <input type="submit" value="Done" />
             </form>
         );
-    },
+    }
 });
 
 

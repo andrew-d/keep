@@ -16,7 +16,7 @@ var Application = React.createClass({
                 <ItemList />
             </div>
         );
-    },
+    }
 });
 
 // Expose the application to the user.

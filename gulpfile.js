@@ -17,63 +17,101 @@ var lr     = require('tiny-lr'),
 // Local package.json (for information);
 var pkg         = require('./package.json');
 
-var paths = {
-    scripts: ['src/index.jsx', 'src/js/**/*.jsx', '!src/js/vendor/**'],
-    statics: ['src/index.html']
-    //images: 'client/img/**/*',
+// Shims for packages that don't support browserify.
+var shims = {
+    jquery: {
+        path: './src/js/vendor/jquery-1.11.0.js',
+        exports: '$',
+    },
 };
 
-gulp.task('js', function() {
-    // Browserify (with support for React.js), then rename to '.js',
-    // then write out.
-    return gulp.src(paths.scripts, {read: false})
-        .pipe(browserify({
-            // NOTE: We need the "browserify-shim" key to be present
-            // in package.json so the "browserify-shim" transform
-            // won't throw an error.
-            transform: ['browserify-shim', 'reactify', 'envify'],
+// Vendor libraries (i.e. stuff that's browserified but not shimmed).
+var vendorLibs = ['react'];
 
-            // Shims for packages that don't support browserify.
-            shim: {
-                jquery: {
-                    path: './src/js/vendor/jquery-1.11.0.js',
-                    exports: '$',
-                },
-            },
+
+gulp.task('js', function() {
+    // We exclude all the shim names and the vendor libraries.
+    var externals = Object.keys(shims).concat(vendorLibs);
+
+    // Note: only pass the entrypoint here, not all files.
+    return gulp.src('src/index.jsx', {read: false})
+        .pipe(browserify({
+            transform: ['reactify', 'envify'],
 
             // Handle JSX files.
             extensions: ['jsx'],
 
             // Debug mode unless we're explicitly running in production.
             debug: gutil.env.NODE_ENV !== 'production',
+
+            // Make the vendor libs external.
+            external: externals,
         }))
-        .pipe(concat(pkg.name + '.js'))
+        .pipe(rename(pkg.name + '.js'))
+        .pipe(gulp.dest('build/js/'))
+        .pipe(refresh(server));
+});
+
+gulp.task('vendor', function() {
+    return gulp.src(['vendor.js'], {read: false})
+        .pipe(browserify({
+            // NOTE: We need the "browserify-shim" key to be present
+            // in package.json so the "browserify-shim" transform
+            // here won't throw an error.
+            transform: ['browserify-shim', 'envify'],
+
+            // Include shims here to actually get the right code in place.
+            shim: shims,
+
+            // Debug mode unless we're explicitly running in production.
+            debug: gutil.env.NODE_ENV !== 'production',
+        }).on('prebundle', function(bundle) {
+            // We require the various vendor libraries here, but NOT our shims.
+            // For whatever reason, we can't pass these in the options object,
+            // above, so we just manually call it all here!
+            vendorLibs.forEach(function(lib) {
+                bundle.require(lib);
+            });
+        }))
+        .pipe(rename('vendor.js'))
         .pipe(gulp.dest('build/js/'))
         .pipe(refresh(server));
 });
 
 gulp.task('statics', function() {
     // Simply replace the package name in any static files.
-    return gulp.src(paths.statics)
+    return gulp.src(['src/index.html'])
         .pipe(replace("@@pkg_name", pkg.name))
         .pipe(gulp.dest('build/'))
         .pipe(refresh(server));
 });
 
-gulp.task('build', ['js', 'statics'], function() {
-    // NOTE: call this with NODE_ENV=production to produce smaller
-    // builds - 'envify', above, will strip out stuff that's not
-    // necessary if that is true.
-    if( gutil.env.NODE_ENV !== 'production' ) {
-        gutil.log(gutil.colors.yellow("Building in non-production; " +
-                                      "file will be non-optimal"));
-    }
-
+gulp.task('minify_js', ['js'], function() {
     return gulp.src('build/js/' + pkg.name + '.js')
-        .pipe(closure())
+        .pipe(uglify())
         .pipe(concat(pkg.name + '.min.js'))
         .pipe(gulp.dest('build/js'))
         .pipe(refresh(server));
+});
+
+gulp.task('minify_vendor', ['vendor'], function() {
+    return gulp.src('build/js/vendor.js')
+        .pipe(uglify())
+        .pipe(concat('vendor.min.js'))
+        .pipe(gulp.dest('build/js'))
+        .pipe(refresh(server));
+});
+
+gulp.task('build', ['minify_js', 'minify_vendor', 'statics'], function() {
+    // NOTE: call this with NODE_ENV=production to produce smaller
+    // builds - 'envify', above, will strip out stuff that's not
+    // necessary if that is true.
+    var e = gutil.env.NODE_ENV;
+    if( e !== 'production' ) {
+        gutil.log(gutil.colors.yellow("Built in non-production; " +
+                                      "file will be non-optimal"));
+        gutil.log("Value of NODE_ENV: " + e);
+    }
 });
 
 gulp.task('lr-server', function() {
@@ -85,10 +123,10 @@ gulp.task('lr-server', function() {
 
 // Rerun the task when a file changes
 gulp.task('watch', ['js', 'statics', 'lr-server'], function() {
-    gulp.watch(paths.scripts, ['js']);
-    gulp.watch(paths.statics, ['statics']);
-    //gulp.watch(paths.images, ['images']);
+    gulp.watch(['src/index.jsx', 'src/js/**/*.jsx', '!src/js/vendor/**'], ['js']);
+    gulp.watch(['src/index.html'], ['statics']);
+    gulp.watch(['src/js/vendor/**/*.js'], ['vendor']);
 });
 
 // The default task (called when you run `gulp` by itself)
-gulp.task('default', ['js', 'statics', 'lr-server']);
+gulp.task('default', ['js', 'vendor', 'statics']);

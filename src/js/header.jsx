@@ -7,7 +7,7 @@ var Header = React.createClass({
                 Keep
             </header>
         );
-    },
+    }
 });
 
 module.exports = Header;
