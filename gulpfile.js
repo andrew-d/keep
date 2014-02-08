@@ -23,10 +23,17 @@ var shims = {
         path: './src/js/vendor/jquery-1.11.0.js',
         exports: '$',
     },
+    react_backbone: {
+        path: './src/js/vendor/react.backbone.js',
+        depends: {
+            react: 'react'
+        },
+        exports: null,
+    },
 };
 
 // Vendor libraries (i.e. stuff that's browserified but not shimmed).
-var vendorLibs = ['react'];
+var vendorLibs = ['react', 'underscore', 'backbone'];
 
 
 gulp.task('js', function() {
@@ -78,12 +85,21 @@ gulp.task('vendor', function() {
         .pipe(refresh(server));
 });
 
-gulp.task('statics', function() {
+gulp.task('static_html', function() {
     // Simply replace the package name in any static files.
     return gulp.src(['src/index.html'])
         .pipe(replace("@@pkg_name", pkg.name))
         .pipe(gulp.dest('build/'))
         .pipe(refresh(server));
+});
+
+gulp.task('static_css', function() {
+    // Copy vendor CSS
+    return gulp.src(['src/css/vendor/*.css'])
+        .pipe(gulp.dest('build/css/vendor/'));
+});
+
+gulp.task('statics', ['static_html', 'static_css'], function() {
 });
 
 gulp.task('minify_js', ['js'], function() {
@@ -110,7 +126,7 @@ gulp.task('build', ['minify_js', 'minify_vendor', 'statics'], function() {
     if( e !== 'production' ) {
         gutil.log(gutil.colors.yellow("Built in non-production; " +
                                       "file will be non-optimal"));
-        gutil.log("Value of NODE_ENV: " + e);
+        gutil.log("  Value of NODE_ENV: " + e);
     }
 });
 
@@ -123,7 +139,11 @@ gulp.task('lr-server', function() {
 
 // Rerun the task when a file changes
 gulp.task('watch', ['js', 'statics', 'lr-server'], function() {
-    gulp.watch(['src/index.jsx', 'src/js/**/*.jsx', '!src/js/vendor/**'], ['js']);
+    gulp.watch([
+        'src/index.jsx', 'src/js/**/*.jsx',
+        'src/js/**/*.js',
+        '!src/js/vendor/**'
+    ], ['js']);
     gulp.watch(['src/index.html'], ['statics']);
     gulp.watch(['src/js/vendor/**/*.js'], ['vendor']);
 });

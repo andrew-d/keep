@@ -9,9 +9,8 @@ var ItemList = require('./itemlist.jsx');
 var Application = React.createClass({
     render: function() {
         return (
-            <div className="test">
+            <div className="container">
                 <Header />
-                Hello world
                 <EditBox />
                 <ItemList />
             </div>

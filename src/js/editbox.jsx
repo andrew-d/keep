@@ -7,17 +7,24 @@ var EditBox = React.createClass({
         var title = this.refs.title.getDOMNode().value.trim();
         var text = this.refs.text.getDOMNode().value.trim();
 
-        console.log(title + ": " + text);
+        alert(title + ": " + text);
 
         return false;
     },
 
     render: function() {
         return (
-            <form className="newForm" onSubmit={this.handleSubmit}>
-              <input type="text" placeholder="Title" ref="title" />
-              <input type="text" ref="text" />
-              <input type="submit" value="Done" />
+            <form role="form" className="newForm" onSubmit={this.handleSubmit}>
+              <div className="form-group">
+                <input type="text" placeholder="Title" ref="title" />
+              </div>
+              <div className="form-group">
+                <textarea className="form-control" ref="text">
+                </textarea>
+              </div>
+              <button type="submit" className="btn btn-default">
+                Done
+              </button>
             </form>
         );
     }
