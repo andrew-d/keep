@@ -7,7 +7,7 @@ var ListItemEntry = require('./listitementry.jsx');
 
 var ListItem = React.createClass({
     render: function() {
-        var todoNodes = _.map(this.props.items, function(item, index) {
+        var todoNodes = this.props.items.map(function(item, index) {
             return <ListItemEntry item={item} key={index} />
         });
 

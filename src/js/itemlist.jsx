@@ -29,11 +29,16 @@ var ItemList = React.createClass({
 
         var itemNodes = items.map(function(item) {
             if( item.get('type') === 'note' ) {
-                return <NoteItem key={item.id} contents={item.get('contents')} />
+                return <NoteItem
+                            key={item.id}
+                            contents={item.get('contents')} />
             } else if( item.get('type') === 'list' ) {
-                return <ListItem key={item.id} items={item.get('items')} />
+                return <ListItem
+                            key={item.id}
+                            items={item.entries} />
             }
 
+            // TODO: some sort of error here
             return <p>Unknown item</p>
         });
         return (

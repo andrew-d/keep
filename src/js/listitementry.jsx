@@ -5,11 +5,13 @@ var React = require('react');
 
 var ListItemEntry = React.createClass({
     getInitialState: function() {
-        return {checked: this.props.item.checked};
+        return {checked: this.props.item.get('checked')};
     },
     handleChange: function(event) {
-        this.setState({checked: event.target.checked});
-        // TODO: update model somehow
+        var n = event.target.checked;
+
+        this.setState({checked: n});
+        this.props.item.set('checked', n);
     },
     render: function() {
         return (
@@ -19,7 +21,7 @@ var ListItemEntry = React.createClass({
                        onChange={this.handleChange}
                        value=''
                        ref='check' />
-                {this.props.item.text}
+                {this.props.item.get('text')}
             </div>
         );
     }
