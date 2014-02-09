@@ -1,7 +1,11 @@
 /** @jsx React.DOM */
-var $     = require('jquery');
-var React = require('react');
-var pkg = require('../package.json');
+var $        = require('jquery');
+var Backbone = require('backbone');
+var React    = require('react');
+var pkg      = require('../package.json');
+
+// TODO: find better way to deal with this
+Backbone.$ = $;
 
 var Application = require('./js/App.jsx')
 

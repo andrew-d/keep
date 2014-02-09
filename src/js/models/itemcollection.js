@@ -4,6 +4,8 @@ var NoteItem = require('./NoteItem.js');
 var ListItem = require('./ListItem.js');
 
 var ItemCollection = Backbone.Collection.extend({
+    url: '/items',
+
     model: function(attrs, options) {
         if( attrs.type === 'note' ) {
             return new NoteItem(attrs, options);

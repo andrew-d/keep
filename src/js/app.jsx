@@ -10,17 +10,8 @@ var ItemCollection = require('./models/ItemCollection.js');
 
 var Application = React.createClass({
     componentWillMount: function() {
-        var items = this.items = new ItemCollection();
-
-        $.ajax({
-            url: '/items',
-            type: 'GET',
-        }).done(function(response) {
-            console.log(response);
-            items.reset(response);
-        });
-
-        // TODO: handle errors in server response
+        this.items = new ItemCollection();
+        this.items.fetch();
     },
     render: function() {
         return (
