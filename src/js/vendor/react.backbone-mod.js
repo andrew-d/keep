@@ -1,5 +1,6 @@
 var React = require('react');
 var Backbone = require('backbone');
+var _ = require('underscore')._;
 
 React.BackboneMixin = {
     _subscribe: function(model) {

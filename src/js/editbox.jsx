@@ -1,13 +1,20 @@
 /** @jsx React.DOM */
 var React = require('react');
 
+var NoteItem = require('./models/NoteItem.js');
+
 
 var EditBox = React.createClass({
     handleSubmit: function() {
         var title = this.refs.title.getDOMNode().value.trim();
         var text = this.refs.text.getDOMNode().value.trim();
 
-        alert(title + ": " + text);
+        var model = new NoteItem({
+            type: 'note',
+            title: title,
+            contents: text
+        });
+        this.props.coll.add(model);
 
         return false;
     },

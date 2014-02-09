@@ -1,53 +1,15 @@
 /** @jsx React.DOM */
 var React = require('react');
+var _ = require('react_backbone');
 var _ = require('underscore')._;
 
 var NoteItem = require('./NoteItem.jsx');
 var ListItem = require('./ListItem.jsx');
-var ItemCollection = require('./models/ItemCollection.js');
 
 
-var ItemList = React.createClass({
+var ItemList = React.createBackboneClass({
     render: function() {
-        // TODO: retrieve these from the server
-        var items = new ItemCollection([
-            {
-                id: 1,
-                type: 'note',
-                title: 'Note Title',
-                contents: 'foobar'
-            },
-            {
-                id: 2,
-                type: 'list',
-                title: 'List Title',
-                items: [
-                    {text: 'One', checked: false},
-                    {text: 'Two', checked: false},
-                    {text: 'Three', checked: true}
-                ]
-            },
-            {
-                id: 3,
-                type: 'note',
-                title: 'Item 3',
-                contents: 'three'
-            },
-            {
-                id: 4,
-                type: 'note',
-                title: 'Item 4',
-                contents: 'four'
-            },
-            {
-                id: 5,
-                type: 'note',
-                title: 'Item 5',
-                contents: 'five'
-            }
-        ]);
-
-        var itemNodes = items.map(function(item) {
+        var itemNodes = this.getModel().map(function(item) {
             if( item.get('type') === 'note' ) {
                 return <NoteItem
                             key={item.id}
