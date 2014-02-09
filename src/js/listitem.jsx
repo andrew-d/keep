@@ -11,9 +11,19 @@ var ListItem = React.createClass({
             return <ListItemEntry item={item} key={index} />
         });
 
-        return (
-            <div className="list-item">
+        var contents = [
+            <div className="panel-body">
                 {todoNodes}
+            </div>
+        ];
+        var title = this.props.model.get('title');
+        if( title && title.length > 0 ) {
+            contents.unshift(<div className="panel-heading">{title}</div>);
+        }
+
+        return (
+            <div className="list-item panel panel-default">
+                {contents}
             </div>
         );
     },

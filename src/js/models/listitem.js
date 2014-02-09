@@ -4,7 +4,8 @@ var ListItemEntryCollection = require('./listitementrycollection.js');
 
 var ListItem = Backbone.Model.extend({
     defaults: {
-        type: 'list'
+        type: 'list',
+        title: ''
         // TODO: more here
     },
     constructor: function(attrs, options) {

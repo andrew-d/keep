@@ -14,11 +14,13 @@ var ItemList = React.createClass({
             {
                 id: 1,
                 type: 'note',
+                title: 'Note Title',
                 contents: 'foobar'
             },
             {
                 id: 2,
                 type: 'list',
+                title: 'List Title',
                 items: [
                     {text: 'One', checked: false},
                     {text: 'Two', checked: false},
@@ -31,10 +33,11 @@ var ItemList = React.createClass({
             if( item.get('type') === 'note' ) {
                 return <NoteItem
                             key={item.id}
-                            contents={item.get('contents')} />
+                            model={item} />
             } else if( item.get('type') === 'list' ) {
                 return <ListItem
                             key={item.id}
+                            model={item}
                             items={item.entries} />
             }
 
