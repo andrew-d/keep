@@ -11,6 +11,47 @@ app.configure(function(){
     app.use('/', express.static(path.join(__dirname, 'build')));
 });
 
+app.get('/items', function(req, resp) {
+    // TODO: database or something
+    // TODO: returning just a bare array is a bad idea - fix this
+    resp.send([
+        {
+            id: 1,
+            type: 'note',
+            title: 'Note Title',
+            contents: 'foobar'
+        },
+        {
+            id: 2,
+            type: 'list',
+            title: 'List Title',
+            items: [
+                {text: 'One', checked: false},
+                {text: 'Two', checked: false},
+                {text: 'Three', checked: true}
+            ]
+        },
+        {
+            id: 3,
+            type: 'note',
+            title: 'Item 3',
+            contents: 'three'
+        },
+        {
+            id: 4,
+            type: 'note',
+            title: 'Item 4',
+            contents: 'four'
+        },
+        {
+            id: 5,
+            type: 'note',
+            title: 'Item 5',
+            contents: 'five'
+        }
+    ]);
+});
+
 app.listen(app.get('port'), app.get('host'), function() {
     // Mimic the Python 'SimpleHTTPServer' status line.
     console.log('Serving HTTP on ' + app.get('host') +
