@@ -3,7 +3,7 @@ var React = require('react');
 var _ = require('react_backbone');
 var _ = require('underscore')._;
 
-var ListItemEntry = require('./listitementry.jsx');
+var ListItemEntry = require('./ListItemEntry.jsx');
 
 
 var ListItem = React.createBackboneClass({

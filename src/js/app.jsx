@@ -1,9 +1,9 @@
 /** @jsx React.DOM */
 var React = require('react');
 
-var Header = require('./header.jsx');
-var EditBox = require('./editbox.jsx');
-var ItemList = require('./itemlist.jsx');
+var Header = require('./Header.jsx');
+var EditBox = require('./EditBox.jsx');
+var ItemList = require('./ItemList.jsx');
 
 
 var Application = React.createClass({

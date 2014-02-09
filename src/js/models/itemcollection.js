@@ -1,7 +1,7 @@
 var Backbone = require('backbone');
 
-var NoteItem = require('./noteitem.js');
-var ListItem = require('./listitem.js');
+var NoteItem = require('./NoteItem.js');
+var ListItem = require('./ListItem.js');
 
 var ItemCollection = Backbone.Collection.extend({
     model: function(attrs, options) {

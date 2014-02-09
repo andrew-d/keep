@@ -1,6 +1,6 @@
 var Backbone = require('backbone');
 
-var ListItemEntryCollection = require('./listitementrycollection.js');
+var ListItemEntryCollection = require('./ListItemEntryCollection.js');
 
 var ListItem = Backbone.Model.extend({
     defaults: {

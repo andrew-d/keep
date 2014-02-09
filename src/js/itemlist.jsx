@@ -2,9 +2,9 @@
 var React = require('react');
 var _ = require('underscore')._;
 
-var NoteItem = require('./noteitem.jsx');
-var ListItem = require('./listitem.jsx');
-var ItemCollection = require('./models/itemcollection.js');
+var NoteItem = require('./NoteItem.jsx');
+var ListItem = require('./ListItem.jsx');
+var ItemCollection = require('./models/ItemCollection.js');
 
 
 var ItemList = React.createClass({
