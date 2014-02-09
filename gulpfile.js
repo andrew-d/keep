@@ -13,11 +13,12 @@ var gulp        = require('gulp'),
 var lr     = require('tiny-lr'),
     server = lr();
 
-var _ = require('underscore')._;
+var _    = require('underscore')._;
+var util = require('util');
 
 
 // Local package.json (for information);
-var pkg         = require('./package.json');
+var pkg = require('./package.json');
 
 // Shims for packages that don't support browserify.
 var shims = {
@@ -50,7 +51,7 @@ gulp.task('js', function() {
             extensions: ['jsx'],
 
             // Debug mode unless we're explicitly running in production.
-            debug: gutil.env.NODE_ENV !== 'production',
+            debug: process.env.NODE_ENV !== 'production',
 
             // Make the vendor libs external.
             external: externals,
@@ -72,7 +73,7 @@ gulp.task('vendor', function() {
             shim: shims,
 
             // Debug mode unless we're explicitly running in production.
-            debug: gutil.env.NODE_ENV !== 'production',
+            debug: process.env.NODE_ENV !== 'production',
         }).on('prebundle', function(bundle) {
             // We require the various vendor libraries here, but NOT our shims.
             // For whatever reason, we can't pass these in the options object,
@@ -123,7 +124,7 @@ gulp.task('build', ['minify_js', 'minify_vendor', 'statics'], function() {
     // NOTE: call this with NODE_ENV=production to produce smaller
     // builds - 'envify', above, will strip out stuff that's not
     // necessary if that is true.
-    var e = gutil.env.NODE_ENV;
+    var e = process.env.NODE_ENV;
     if( e !== 'production' ) {
         gutil.log(gutil.colors.yellow("Built in non-production; " +
                                       "file will be non-optimal"));
