@@ -20,6 +20,7 @@
   "devDependencies": {
     "browserify": "~3.24.11",
     "browserify-shim": "~3.2.2",
+    "envify": "~0.2.0",
     "gulp": "~3.5.1",
     "gulp-browserify": "~0.4.2",
     "gulp-closure-compiler": "~0.1.2",
@@ -34,8 +35,9 @@
     "tiny-lr": "0.0.5"
   },
   "dependencies": {
-    "react": "~0.8.0",
+    "backbone": "~1.1.0",
     "express": "~3.4.8",
+    "react": "~0.8.0",
     "underscore": "~1.5.2"
   },
   "browserify-shim": {}
