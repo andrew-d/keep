@@ -13,6 +13,8 @@ var gulp        = require('gulp'),
 var lr     = require('tiny-lr'),
     server = lr();
 
+var _ = require('underscore')._;
+
 
 // Local package.json (for information);
 var pkg         = require('./package.json');
@@ -24,21 +26,20 @@ var shims = {
         exports: '$',
     },
     react_backbone: {
-        path: './src/js/vendor/react.backbone.js',
+        path: './src/js/vendor/react.backbone-mod.js',
         depends: {
             react: 'react'
         },
         exports: null,
-    },
+    }
 };
 
 // Vendor libraries (i.e. stuff that's browserified but not shimmed).
 var vendorLibs = ['react', 'underscore', 'backbone'];
 
-
 gulp.task('js', function() {
     // We exclude all the shim names and the vendor libraries.
-    var externals = Object.keys(shims).concat(vendorLibs);
+    var externals = _.keys(shims).concat(vendorLibs);
 
     // Note: only pass the entrypoint here, not all files.
     return gulp.src('src/index.jsx', {read: false})
@@ -145,7 +146,7 @@ gulp.task('watch', ['js', 'statics', 'lr-server'], function() {
         '!src/js/vendor/**'
     ], ['js']);
     gulp.watch(['src/index.html'], ['statics']);
-    gulp.watch(['src/js/vendor/**/*.js'], ['vendor']);
+    gulp.watch(['src/js/vendor/*.js', 'src/js/vendor/**/*.js'], ['vendor']);
 });
 
 // The default task (called when you run `gulp` by itself)

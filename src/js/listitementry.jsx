@@ -1,17 +1,18 @@
 /** @jsx React.DOM */
-var _ = require('underscore')._;
 var React = require('react');
+var _ = require('react_backbone');
+var _ = require('underscore')._;
 
 
-var ListItemEntry = React.createClass({
+var ListItemEntry = React.createBackboneClass({
     getInitialState: function() {
-        return {checked: this.props.item.get('checked')};
+        return {checked: this.getModel().get('checked')};
     },
     handleChange: function(event) {
         var n = event.target.checked;
 
         this.setState({checked: n});
-        this.props.item.set('checked', n);
+        this.getModel().set('checked', n);
     },
     render: function() {
         return (
@@ -21,7 +22,7 @@ var ListItemEntry = React.createClass({
                        onChange={this.handleChange}
                        value=''
                        ref='check' />
-                {this.props.item.get('text')}
+                {this.getModel().get('text')}
             </div>
         );
     }

@@ -1,14 +1,16 @@
 /** @jsx React.DOM */
 var React = require('react');
+var _ = require('react_backbone');
 var _ = require('underscore')._;
 
 var ListItemEntry = require('./listitementry.jsx');
 
 
-var ListItem = React.createClass({
+var ListItem = React.createBackboneClass({
     render: function() {
-        var todoNodes = this.props.items.map(function(item, index) {
-            return <ListItemEntry item={item} key={index} />
+        var items = this.getModel().entries;
+        var todoNodes = items.map(function(item, index) {
+            return <ListItemEntry model={item} key={index} />
         });
 
         var contents = [
@@ -16,13 +18,14 @@ var ListItem = React.createClass({
                 {todoNodes}
             </div>
         ];
-        var title = this.props.model.get('title');
+        var title = this.getModel().get('title');
         if( title && title.length > 0 ) {
             contents.unshift(<div className="panel-heading">{title}</div>);
         }
 
+        // TODO: add 'key's to stop warning?
         return (
-            <div className="list-item panel panel-default">
+            <div className="item panel panel-default">
                 {contents}
             </div>
         );

@@ -26,6 +26,24 @@ var ItemList = React.createClass({
                     {text: 'Two', checked: false},
                     {text: 'Three', checked: true}
                 ]
+            },
+            {
+                id: 3,
+                type: 'note',
+                title: 'Item 3',
+                contents: 'three'
+            },
+            {
+                id: 4,
+                type: 'note',
+                title: 'Item 4',
+                contents: 'four'
+            },
+            {
+                id: 5,
+                type: 'note',
+                title: 'Item 5',
+                contents: 'five'
             }
         ]);
 
@@ -37,8 +55,7 @@ var ItemList = React.createClass({
             } else if( item.get('type') === 'list' ) {
                 return <ListItem
                             key={item.id}
-                            model={item}
-                            items={item.entries} />
+                            model={item} />
             }
 
             // TODO: some sort of error here
