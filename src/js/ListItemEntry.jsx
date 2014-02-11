@@ -15,14 +15,27 @@ var ListItemEntry = React.createBackboneClass({
         this.getModel().set('checked', n);
     },
     render: function() {
+        var inputStyle = {
+            textDecoration: this.state.checked ? 'line-through' : '',
+        };
+
         return (
-            <div className="checkbox">
-                <input type='checkbox'
-                       checked={this.state.checked}
-                       onChange={this.handleChange}
-                       value=''
-                       ref='check' />
-                {this.getModel().get('text')}
+            <div className="row">
+                <div className="col-lg-12">
+                    <div className="input-group">
+                        <span className="input-group-addon">
+                            <input type="checkbox"
+                               checked={this.state.checked}
+                               onChange={this.handleChange}
+                               ref='check' />
+                        </span>
+                        <input type="text"
+                            className="form-control"
+                            value={this.getModel().get('text')}
+                            style={inputStyle}
+                            ref="input" />
+                    </div>
+                </div>
             </div>
         );
     }
