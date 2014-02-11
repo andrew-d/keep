@@ -17,8 +17,16 @@ var Application = React.createClass({
         return (
             <div className="container">
                 <Header />
-                <EditBox coll={this.items} />
-                <ItemList model={this.items} />
+                <div className="row">
+                    <div className="col-md-6 col-md-offset-3">
+                        <EditBox coll={this.items} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <ItemList model={this.items} />
+                    </div>
+                </div>
             </div>
         );
     }

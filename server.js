@@ -116,7 +116,7 @@ var addTestData = function() {
         {type: 'note', title: 'Note 1', text: 'Text 1'},
         {type: 'note', title: 'Note 2', text: 'Text 2'},
         {type: 'note', title: 'Note 3', text: 'Text 3'},
-        {type: 'note', title: 'Note 4', text: 'Text 4'},
+        {type: 'note', title: '', text: 'Note with no title'},
         {type: 'list', title: 'List 1',
          items: [{text: 'foo', checked: false},
                  {text: 'bar', checked: true}],

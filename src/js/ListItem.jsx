@@ -20,7 +20,15 @@ var ListItem = React.createBackboneClass({
         ];
         var title = this.getModel().get('title');
         if( title && title.length > 0 ) {
-            contents.unshift(<div className="panel-heading">{title}</div>);
+            // TODO: add close button somewhere on untitled notes
+            contents.unshift(
+                <div className="panel-heading">
+                    {title}
+                    <div className="pull-right">
+                        <button type="button" className="close" aria-hidden="true">&times;</button>
+                    </div>
+                </div>
+            );
         }
 
         // TODO: add 'key's to stop warning?

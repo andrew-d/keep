@@ -24,14 +24,14 @@ var EditBox = React.createClass({
         return (
             <form role="form" className="newForm" onSubmit={this.handleSubmit}>
               <div className="form-group">
-                <input type="text" placeholder="Title" ref="title" />
+                <input type="text" className="form-control" placeholder="Title" ref="title" />
               </div>
               <div className="form-group">
                 <textarea className="form-control" ref="text">
                 </textarea>
               </div>
-              <button type="submit" className="btn btn-default">
-                Done
+              <button type="submit" className="btn btn-primary">
+                Add
               </button>
             </form>
         );

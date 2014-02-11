@@ -25,9 +25,7 @@ var ItemList = React.createBackboneClass({
         });
         return (
             <div className="item-list">
-                <ul>
-                    {itemNodes}
-                </ul>
+                {itemNodes}
             </div>
         );
     }
