@@ -7,7 +7,7 @@ var NoteItem = React.createBackboneClass({
     render: function() {
         var contents = [
             <div className="panel-body">
-                {this.getModel().get('contents')}
+                {this.getModel().get('text')}
             </div>
         ];
         var title = this.getModel().get('title');

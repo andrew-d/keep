@@ -12,7 +12,7 @@ var EditBox = React.createClass({
         var model = new NoteItem({
             type: 'note',
             title: title,
-            contents: text
+            text: text
         });
         this.props.coll.add(model);
         model.save();
