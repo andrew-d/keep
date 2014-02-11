@@ -22,6 +22,7 @@ var setupDatabase = function() {
                 t.increments('id').primary();
                 t.string('title', 100).notNullable();
                 t.enu('type', ['note', 'list']).notNullable();
+                t.integer('timestamp').notNullable();
 
                 // The 'text' field is uses if type === 'note'
                 t.text('text').nullable();
@@ -61,6 +62,7 @@ var addNoteItem = function(item) {
         type: 'note',
         title: item.title,
         text: item.text,
+        timestamp: item.timestamp,
     }, 'id');
 };
 
@@ -77,6 +79,7 @@ var addListItem = function(item) {
             .insert({
                 type: 'list',
                 title: item.title,
+                timestamp: item.timestamp,
             }, 'id')
             .then(function(row) {
                 // Save inserted ID (used below).
@@ -124,6 +127,9 @@ var addTestData = function() {
         {type: 'list', title: 'List 2', items: []},
     ], function(info, i) {
         var prom;
+
+        // Add the time to the item.
+        info.timestamp = new Date().getTime();
 
         if( 'note' === info.type ) {
             prom = addNoteItem(info);

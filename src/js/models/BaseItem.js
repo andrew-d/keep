@@ -6,6 +6,10 @@ var BaseItem = Backbone.Model.extend({
             title: '',
             timestamp: 0,
         };
+    },
+
+    initialize: function() {
+        this.set('timestamp', new Date().getTime());
     }
 });
 
