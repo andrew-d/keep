@@ -23,6 +23,11 @@ var Application = React.createClass({
                     </div>
                 </div>
                 <div className="row">
+                    <div className="col-xs-12">
+                        <hr />
+                    </div>
+                </div>
+                <div className="row">
                     <div className="col-md-12">
                         <ItemList model={this.items} />
                     </div>
