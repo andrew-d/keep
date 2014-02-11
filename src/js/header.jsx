@@ -26,7 +26,6 @@ var Header = React.createClass({
         });
 
         // TODO: listen to router changes and update state.active
-        // TODO: set project name below
         // TODO: include JS for toggling navigation in vendor.js
 
         return (
@@ -39,7 +38,7 @@ var Header = React.createClass({
                     <span className="icon-bar"></span>
                     <span className="icon-bar"></span>
                   </button>
-                  <a className="navbar-brand" href="#">Project name</a>
+                  <a className="navbar-brand" href="#">Keep</a>
                 </div>
                 <div className="navbar-collapse collapse">
                   <ul className="nav navbar-nav">

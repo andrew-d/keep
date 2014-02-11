@@ -1,10 +1,16 @@
-var Backbone = require('backbone');
+var _        = require('underscore')._;
 
-var NoteItem = Backbone.Model.extend({
-    defaults: {
-        type: 'note',
-        title: '',
-        contents: ''
+var BaseItem = require('./BaseItem.js');
+
+var NoteItem = BaseItem.extend({
+    defaults: function() {
+        // Copy the superclass defaults and then add our own.
+        return _.extend({},
+            BaseItem.prototype.defaults(),
+        {
+            type: 'note',
+            contents: ''
+        });
     }
 });
 
