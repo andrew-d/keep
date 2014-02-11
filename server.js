@@ -65,6 +65,9 @@ var addNoteItem = function(item) {
 };
 
 var addListItem = function(item) {
+    // Save the ID of the inserted item here for when things go well.
+    var insertedId = null;
+
     // Add all components as a transaction.
     return knex.transaction(function(t) {
         // Insert main list item, and then only if that succeeds,
@@ -76,24 +79,35 @@ var addListItem = function(item) {
                 title: item.title,
             }, 'id')
             .then(function(row) {
+                // Save inserted ID (used below).
+                insertedId = row[0];
+
                 // Get list of items to insert.
                 var toInsert = _.map(item.items, function(val, i) {
                     return {
-                        item: row[0],
+                        item: insertedId,
                         id: i,
                         text: val.text,
                         checked: val.checked,
                     };
                 });
 
-                // Resolve when all items have been inserted.
-                return Promise.all(_.map(toInsert, function(item) {
-                    return knex('listItems')
-                            .transacting(t)
-                            .insert(item);
-                }));
+                // Only continue resolving if there are actually items at all.
+                if( toInsert.length > 0 ) {
+                    return Promise.all(_.map(toInsert, function(item) {
+                        return knex('listItems')
+                                .transacting(t)
+                                .insert(item);
+                    }));
+                }
             })
-            .then(t.commit, t.rollback);
+            .then(t.commit, t.rollback);    // Commit on success, rollback on
+                                            // error.
+    }).then(function() {
+        // We use this so the final return value of the promise is always
+        // the inserted ID of the item, not the array of inserted IDs of the
+        // list items (which is what it'll be from Promise.all, above).
+        return insertedId;
     });
 };
 
@@ -107,6 +121,7 @@ var addTestData = function() {
          items: [{text: 'foo', checked: false},
                  {text: 'bar', checked: true}],
         },
+        {type: 'list', title: 'List 2', items: []},
     ], function(info, i) {
         var prom;
 
@@ -119,7 +134,7 @@ var addTestData = function() {
         }
 
         prom.then(function(row) {
-            console.log('inserted item with id: ' + row[0]);
+            console.log('inserted item: ' + row);
         }, function(err) {
             console.log("error inserting item " + i + ": " + err);
         });
@@ -192,6 +207,8 @@ app.get('/items', function(req, resp) {
             //    that to the output array.
             var promises = [];
 
+            // TODO: break this out into another function called 'loadItem' or
+            // something?
             _.each(row, function(item, i) {
                 if( item.type === 'note' ) {
                     items.push(item);
@@ -204,24 +221,32 @@ app.get('/items', function(req, resp) {
                             })
                             .select()
                             .then(function(row) {
-                                item.items = row;
+                                // Convert each row's 'checked' entry to a
+                                // boolean (since SQLite stores booleans as
+                                // integers).
+                                item.items = _.map(_.clone(row), function(x) {
+                                    x.checked = Boolean(x.checked);
+                                    return x;
+                                });
 
                                 // Will always be null for list items.
                                 delete item.text;
 
-                                // Convert to boolean (SQLite stores booleans
-                                // as integers).
-                                item.checked = Boolean(item.checked);
-
                                 // Push on list.
                                 items.push(item);
                             });
+
                 promises.push(prom);
             });
 
+            // All list items must have their entries fetched for this to be
+            // true.
             return Promise.all(promises);
         }).then(function() {
             resp.send(items);
+        }, function(err) {
+            resp.send(500, {error: 'error fetching all items'});
+            // TODO: log error somehow
         });
 });
 app.get('/items/:id', function(req, resp) {
