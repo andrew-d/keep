@@ -9,7 +9,7 @@ var NoteItem = BaseItem.extend({
             BaseItem.prototype.defaults(),
         {
             type: 'note',
-            contents: ''
+            text: ''
         });
     }
 });
