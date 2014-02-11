@@ -1,7 +1,60 @@
-var express = require('express'),
-    path    = require('path');
-    util    = require('util');
-    _       = require('underscore')._;
+var express   = require('express'),
+    Knex      = require('knex'),
+    path      = require('path'),
+    Promise   = require('bluebird'),
+    util      = require('util'),
+    validator = require('validator'),
+    _         = require('underscore')._;
+
+// Set up DB.
+var knex = Knex.initialize({
+    client: 'sqlite3',
+    connection: {
+        filename: './keep.db',
+    }
+});
+
+var setupDatabase = function() {
+    var items = knex.schema.hasTable('items').then(function(exists) {
+        if( !exists ) {
+            console.log("Creating 'items' table...");
+            return knex.schema.createTable('items', function(t) {
+                t.increments('id').primary();
+                t.string('title', 100).notNullable();
+                t.enu('type', ['note', 'list']).notNullable();
+                t.text('contents').notNullable();
+                // TODO: contents for list?
+            });
+        } else {
+            console.log("'items' table already exists");
+        }
+    });
+
+    // Resolve only when all creations are finished.
+    return Promise.all([
+        items,
+    ]);
+};
+
+var addTestData = function() {
+    return Promise.all(_.map([
+        {title: 'Note 1', contents: 'Contents 1'},
+        {title: 'Note 2', contents: 'Contents 2'},
+        {title: 'Note 3', contents: 'Contents 3'},
+        {title: 'Note 4', contents: 'Contents 4'},
+    ], function(info) {
+        return knex('items')
+                .insert({
+                    type: 'note',
+                    title: info.title,
+                    contents: info.contents,
+                }, 'id').then(function(row) {
+                    console.log('inserted item with id: ' + row[0]);
+                }, function(err) {
+                    console.log("error inserting item " + i + ": " + err);
+                });
+    }));
+};
 
 var app = express();
 
@@ -10,73 +63,85 @@ app.configure(function(){
     app.set('host', '0.0.0.0');
 
     app.use(express.logger());
+    app.use(express.json());
     app.use('/', express.static(path.join(__dirname, 'build')));
+
+    // TODO: move to management script or something.
+    setupDatabase().then(function() {
+        return addTestData();
+    }).then(function() {
+        console.log("DB init done");
+    }, function(err) {
+        console.error("error initializing DB: " + err);
+    });
 });
 
 
-// TODO: database or something
-var items = [
-    {
-        id: 1,
-        type: 'note',
-        title: 'Note Title',
-        contents: 'foobar'
-    },
-    {
-        id: 2,
-        type: 'list',
-        title: 'List Title',
-        items: [
-            {text: 'One', checked: false},
-            {text: 'Two', checked: false},
-            {text: 'Three', checked: true}
-        ]
-    },
-    {
-        id: 3,
-        type: 'note',
-        title: 'Item 3',
-        contents: 'three'
-    },
-    {
-        id: 4,
-        type: 'note',
-        title: 'Item 4',
-        contents: 'four'
-    },
-    {
-        id: 5,
-        type: 'note',
-        title: 'Item 5',
-        contents: 'five'
-    }
-];
-
 app.post('/items', function(req, resp) {
-    // TODO: handle item creation
+    // Validate input parameters.
+    var type = validator.toString(req.body.type),
+        title = validator.toString(req.body.title),
+        contents = validator.toString(req.body.contents);
+    if( !validator.isLength(title, 0, 100) ) {
+        resp.send(400, {error: 'invalid title length'});
+        return;
+    }
+    if( !validator.isIn(type, ['note', 'list']) ) {
+        resp.send(400, {error: 'invalid type: ' + type});
+        return;
+    }
+
+    knex('items')
+        .insert({
+            type: type,
+            title: title,
+            contents: contents,
+        }, 'id').then(function(row) {
+            resp.send({
+                id: row[0],
+                type: type,
+                title: title,
+                contents: contents,
+            });
+        }, function(err) {
+            resp.send(500, {error: 'error inserting item'});
+        });
 });
 app.get('/items', function(req, resp) {
     // TODO: returning just a bare array is a bad idea - fix this
-    resp.send(items);
+    knex('items').select().then(function(row) {
+        resp.send(row);
+        //resp.send(404, {error: 'not found'});
+    });
 });
 app.get('/items/:id', function(req, resp) {
-    // TODO: better parsing
-    var itemId = +req.params.id;
-
-    var item = _.find(items, function(i) {
-        return i.id === itemId;
-    });
-    if( item !== undefined ) {
-        resp.send(item);
-    } else {
-        resp.send(404, {error: 'not found'});
+    if( !validator.isNumeric(req.params.id) ) {
+        resp.send(400, {error: 'invalid id, must be numeric'});
+        return;
     }
+
+    var itemId = validator.toInt(req.params.id, 10);
+    knex('items')
+        .where({id: itemId})
+        .select()
+        .then(function(row) {
+            if( row.length === 0 ) {
+                resp.send(404, {error: 'not found'});
+            } else {
+                resp.send(row[0]);
+            }
+        }, function(err) {
+            resp.send(500, 'error getting item');
+            // TODO: log error somehow
+        });
 });
 app.put('/items/:id', function(req, resp) {
     // TODO: handle updating single item
+    resp.send(500, {error: 'not implemented'});
 });
 app.del('/items/:id', function(req, resp) {
     // TODO: handle deleting single item
+    resp.send(500, {error: 'not implemented'});
 });
 
 app.listen(app.get('port'), app.get('host'), function() {

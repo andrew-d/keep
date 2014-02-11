@@ -15,6 +15,7 @@ var EditBox = React.createClass({
             contents: text
         });
         this.props.coll.add(model);
+        model.save();
 
         return false;
     },

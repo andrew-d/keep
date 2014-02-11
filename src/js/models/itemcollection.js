@@ -14,6 +14,8 @@ var ItemCollection = Backbone.Collection.extend({
         }
 
         // TODO: error here
+        console.error("unknown type: " + attrs.type);
+        return null;
     }
 });
 

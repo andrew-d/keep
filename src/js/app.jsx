@@ -11,7 +11,7 @@ var ItemCollection = require('./models/ItemCollection.js');
 var Application = React.createClass({
     componentWillMount: function() {
         this.items = new ItemCollection();
-        this.items.fetch();
+        this.items.fetch({reset: true});
     },
     render: function() {
         return (
