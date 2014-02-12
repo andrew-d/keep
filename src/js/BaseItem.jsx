@@ -54,7 +54,7 @@ var BaseItem = React.createBackboneClass({
         }
 
         return (
-            <div className="item panel panel-default">
+            <div className="panel panel-default">
                 {itemHeader}
                 <div className="panel-body">
                     {itemBody}

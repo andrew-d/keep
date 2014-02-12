@@ -29,7 +29,7 @@ var Header = React.createClass({
         // TODO: include JS for toggling navigation in vendor.js
 
         return (
-            <div className="navbar navbar-default" role="navigation">
+            <div className="navbar navbar-default navbar-static-top" role="navigation">
               <div className="container-fluid">
                 <div className="navbar-header">
                   <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">

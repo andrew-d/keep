@@ -104,6 +104,12 @@ gulp.task('static_css', function() {
 gulp.task('statics', ['static_html', 'static_css'], function() {
 });
 
+gulp.task('css', function() {
+    return gulp.src('src/css/*.css')
+            .pipe(concat(pkg.name + '.css'))
+            .pipe(gulp.dest('build/css'));
+});
+
 gulp.task('minify_js', ['js'], function() {
     return gulp.src('build/js/' + pkg.name + '.js')
         .pipe(uglify())
@@ -120,7 +126,7 @@ gulp.task('minify_vendor', ['vendor'], function() {
         .pipe(refresh(server));
 });
 
-gulp.task('build', ['minify_js', 'minify_vendor', 'statics'], function() {
+gulp.task('build', ['minify_js', 'minify_vendor', 'css', 'statics'], function() {
     // NOTE: call this with NODE_ENV=production to produce smaller
     // builds - 'envify', above, will strip out stuff that's not
     // necessary if that is true.
@@ -140,12 +146,13 @@ gulp.task('lr-server', function() {
 })
 
 // Rerun the task when a file changes
-gulp.task('watch', ['js', 'statics', 'lr-server'], function() {
+gulp.task('watch', ['js', 'css', 'statics', 'lr-server'], function() {
     gulp.watch([
         'src/index.jsx', 'src/js/**/*.jsx',
         'src/js/**/*.js',
         '!src/js/vendor/**'
     ], ['js']);
+    gulp.watch(['src/css/*.css'], ['css']);
     gulp.watch(['src/index.html'], ['statics']);
     gulp.watch(['src/js/vendor/*.js', 'src/js/vendor/**/*.js'], ['vendor']);
 });

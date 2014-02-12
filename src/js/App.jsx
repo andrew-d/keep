@@ -14,22 +14,26 @@ var Application = React.createClass({
         this.items.fetch({reset: true});
     },
     render: function() {
+        // NOTE: we need the dummy <div> here, since we can't return multiple
+        // DOM nodes from the render() function.
         return (
-            <div className="container">
+            <div>
                 <Header />
-                <div className="row">
-                    <div className="col-md-6 col-md-offset-3">
-                        <EditBox coll={this.items} />
+                <div className="container">
+                    <div className="row">
+                        <div className="col-md-6 col-md-offset-3">
+                            <EditBox coll={this.items} />
+                        </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="col-xs-12">
-                        <hr />
+                    <div className="row">
+                        <div className="col-md-12">
+                            <hr />
+                        </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-12">
-                        <ItemList model={this.items} />
+                    <div className="row">
+                        <div className="col-md-12">
+                            <ItemList model={this.items} />
+                        </div>
                     </div>
                 </div>
             </div>
