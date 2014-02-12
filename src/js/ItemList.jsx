@@ -43,8 +43,41 @@ var ItemList = React.createBackboneClass({
         // We now layout the individual items with a pinterest-style layout.
         // Firstly, get the width of the container - i.e. the root node.
         var containerWidth = $(rootNode).width();
-        var colWidth = $('.item').outerWidth();
         var marginWidth = 15;
+
+        // Get other parameters we need.
+        // TODO: get this dynamically, since this won't work on the transition from
+        // collapsed to not, due to the above .width() call not being applied yet!
+        //var colWidth = $('.item').outerWidth();
+        var colWidth = 200;
+
+        if( containerWidth <= 460 ) {
+            // If the total size of the container element is less than some
+            // given breakpoint, we should just resize all the elements to the size
+            // of the container (with margins) and not worry about this.
+            var itemWidth = containerWidth - marginWidth*2;
+            var totalHeight = marginWidth;
+
+            $('.item').each(function() {
+                var $this = $(this);
+                $this.width(itemWidth);
+
+                $this.css({
+                    'top': totalHeight,
+                    'left': marginWidth
+                });
+
+                var outerHeight = $this.outerHeight();
+                totalHeight += outerHeight + marginWidth;
+            });
+
+            return;
+        } else {
+            // Resize the item to it's proper width.
+            // NOTE: need to change this if we change the CSS!
+            // TODO: find a way to get this from somewhere?
+            $('.item').width(colWidth);
+        }
 
         // Now, determine how many columns fit in the container.
         var columnCount = Math.floor(containerWidth / (colWidth + marginWidth*2));

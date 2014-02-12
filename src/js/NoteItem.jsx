@@ -6,7 +6,7 @@ var _ = require('react_backbone');
 var NoteItem = React.createBackboneClass({
     render: function() {
         return (
-            <div>
+            <div className="note-body">
                 {this.getModel().get('text')}
             </div>
         );
