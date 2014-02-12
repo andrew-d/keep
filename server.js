@@ -172,7 +172,8 @@ app.post('/items', function(req, resp) {
     // Validate input parameters.
     var type = validator.toString(req.body.type),
         title = validator.toString(req.body.title),
-        text = validator.toString(req.body.text);
+        text = validator.toString(req.body.text),
+        timestamp = validator.toInt(req.body.timestamp);
     if( !validator.isLength(title, 0, 100) ) {
         resp.send(400, {error: 'invalid title length'});
         return;
@@ -187,12 +188,14 @@ app.post('/items', function(req, resp) {
             type: type,
             title: title,
             text: text,
+            timestamp: timestamp,
         }, 'id').then(function(row) {
             resp.send({
                 id: row[0],
                 type: type,
                 title: title,
                 text: text,
+                timestamp: timestamp,
             });
         }, function(err) {
             resp.send(500, {error: 'error inserting item'});
