@@ -11,6 +11,7 @@ import peewee
 import tornado.ioloop
 import tornado.options
 import tornado.web
+import tornado.websocket
 from tornado.options import define, options
 
 
@@ -204,6 +205,18 @@ class ItemHandler(BaseHandler):
         pass
 
 
+# TODO: Use this to broadcast real-time updates
+class SocketHandler(tornado.websocket.WebSocketHandler):
+    def open(self):
+        pass
+
+    def on_message(self):
+        pass
+
+    def on_close(self):
+        pass
+
+
 def add_test_data():
     test_data = [
         {'type': 'note', 'title': 'Note 1', 'text': 'Text 1'},
@@ -239,6 +252,7 @@ if __name__ == "__main__":
 
     curr_dir = os.path.abspath(os.path.dirname(__file__))
     app = tornado.web.Application([
+            (r'/ws', SocketHandler),
             (r'/items', ItemsHandler),
             (r'/items/([0-9]+)', ItemHandler),
         ],
