@@ -15,8 +15,6 @@ from tornado.options import define, options
 
 
 log = logging.getLogger("keep")
-
-
 db_proxy = peewee.Proxy()
 
 
@@ -191,7 +189,13 @@ class ItemHandler(BaseHandler):
         except ValueError:
             self.write_error(400, 'invalid id')
 
-        # TODO: actually respond with something
+        try:
+            item = Item.select().where(Item.id == id).get()
+        except Item.DoesNotExist:
+            self.write_error(404, 'item not found')
+            return
+
+        self.write(item.to_dict())
 
     def put(self, id):
         pass
