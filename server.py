@@ -4,11 +4,17 @@ import os
 import json
 import time
 import uuid
+import logging
 import datetime
 
 import peewee
 import tornado.ioloop
+import tornado.options
 import tornado.web
+from tornado.options import define, options
+
+
+log = logging.getLogger("keep")
 
 
 db_proxy = peewee.Proxy()
@@ -114,10 +120,6 @@ class JSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-# Check if our JSON encoder escapes slashes by default.
-ENCODER_ESCAPES_SLASHES = '\\/' in json.dumps('/')
-
-
 class BaseHandler(tornado.web.RequestHandler):
     def write(self, chunk):
         # We do a couple of things that generally improve working with JSON:
@@ -136,14 +138,13 @@ class BaseHandler(tornado.web.RequestHandler):
         # Debug settings.
         isDebug = self.application.settings.get('debug', False)
         if isDebug:
-            # Pretty print and sort keys
             args['sort_keys'] = True
             args['indent'] = 4
             args['separators'] = (',', ': ')
         else:
             args['separators'] = (',', ':')
 
-        # Do the dumping
+        # Do the real work
         s = json.dumps(chunk, **args)
 
         # In debug mode, we append a newline so when you cURL the API (for
@@ -158,10 +159,20 @@ class BaseHandler(tornado.web.RequestHandler):
               .replace(u"'", u'\\u0027')
              )
 
-        # Write the new string.  Also, mimic the original behavior and set the
-        # HTTP header.
+        # Write the new string.  Also, mimic the original behavior of Tornado
+        # and set the HTTP header.
         tornado.web.RequestHandler.write(self, s)
         self.set_header("Content-Type", "application/json; charset=UTF-8")
+
+    def write_error(self, status_code, message, type="invalid_request", **kwargs):
+        resp = dict(kwargs)
+        resp.update({
+            'type': type,
+            'message': message,
+        })
+
+        self.set_status(status_code)
+        self.write(resp)
 
 
 class ItemsHandler(BaseHandler):
@@ -173,13 +184,20 @@ class ItemsHandler(BaseHandler):
         self.write('add new item')
 
 
-curr_dir = os.path.abspath(os.path.dirname(__file__))
-app = tornado.web.Application([
-        (r'/items', ItemsHandler)
-    ],
-    static_path=os.path.join(curr_dir, 'build'),
-    debug=True
-)
+class ItemHandler(BaseHandler):
+    def get(self, id):
+        try:
+            id = int(id)
+        except ValueError:
+            self.write_error(400, 'invalid id')
+
+        # TODO: actually respond with something
+
+    def put(self, id):
+        pass
+
+    def delete(self, id):
+        pass
 
 
 def add_test_data():
@@ -204,20 +222,39 @@ def add_test_data():
         model.save()
 
 
+define("debug", default=False, help="Run in debug mode")
+define("address", default='0.0.0.0', help="Address to listen on")
+define("port", default=8888, type=int, help="Listen on the given port")
+
+
 if __name__ == "__main__":
+    tornado.options.parse_command_line()
+
     db = peewee.SqliteDatabase('./keep.db')
     db_proxy.initialize(db)
+
+    curr_dir = os.path.abspath(os.path.dirname(__file__))
+    app = tornado.web.Application([
+            (r'/items', ItemsHandler),
+            (r'/items/([0-9]+)', ItemHandler),
+        ],
+        static_path=os.path.join(curr_dir, 'build'),
+        debug=options.debug
+    )
 
     Item.create_table(fail_silently=True)
     ListEntry.create_table(fail_silently=True)
 
     add_test_data()
 
-    addr = '0.0.0.0'        # TODO: use me
-    port = 8888
+    # Mimic the SimpleHTTPServer status line
+    msg = 'Serving HTTP on %s port %d' % (options.address, options.port)
+    if options.debug:
+        msg = msg + ' (debug)'
+    log.info(msg + ' ...')
 
-    print("Serving HTTP on %s port %d ..." % (addr, port))
-    app.listen(port)
+    # Actually kick off listening
+    app.listen(options.port, address=options.address)
 
     try:
         tornado.ioloop.IOLoop.instance().start()
