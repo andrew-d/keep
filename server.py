@@ -209,21 +209,27 @@ class ItemHandler(BaseHandler):
         try:
             id = int(id)
         except ValueError:
-            self.write_error(400, 'invalid id')
+            self.send_error(400, message='invalid id')
 
         try:
             item = Item.select().where(Item.id == id).get()
         except Item.DoesNotExist:
-            self.write_error(404, 'item not found')
+            self.send_error(404, message='item not found')
             return
 
         self.write(item.to_dict())
 
     def put(self, id):
-        pass
+        try:
+            id = int(id)
+        except ValueError:
+            self.send_error(400, message='invalid id')
 
     def delete(self, id):
-        pass
+        try:
+            id = int(id)
+        except ValueError:
+            self.send_error(400, message='invalid id')
 
 
 # TODO: Use this to broadcast real-time updates
