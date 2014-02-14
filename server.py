@@ -198,10 +198,12 @@ class ErrorHandler(BaseHandler):
 
 
 class ItemsHandler(BaseHandler):
+    @tornado.web.removeslash
     def get(self):
         items = list(x.to_dict() for x in Item.select())
         self.write({'items': items})
 
+    @tornado.web.removeslash
     def post(self):
         try:
             new_item = json.loads(self.request.body)
@@ -296,7 +298,7 @@ if __name__ == "__main__":
     curr_dir = os.path.abspath(os.path.dirname(__file__))
     app = tornado.web.Application([
             (r'/ws', SocketHandler),
-            (r'/items', ItemsHandler),
+            (r'/items/?', ItemsHandler),
             (r'/items/([0-9]+)', ItemHandler),
         ],
         static_path=os.path.join(curr_dir, 'build'),
