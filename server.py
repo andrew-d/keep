@@ -127,7 +127,7 @@ class BaseHandler(tornado.web.RequestHandler):
         #   3. If the application is in debug mode or the config flag is set,
         #      we sort the keys, and pretty-print the JSON output.  Otherwise,
         #      we just dump as-is.
-        if not isinstance(chunk, dict):
+        if not isinstance(chunk, (dict, list)):
             return tornado.web.RequestHandler.write(self, chunk)
 
         args = {
@@ -147,6 +147,11 @@ class BaseHandler(tornado.web.RequestHandler):
 
         # Do the real work
         s = json.dumps(chunk, **args)
+
+        # Prepend "while(1);" to the response if it's a list, to prevent JSON
+        # hijacking.  This gets stripped on the client-side.
+        if isinstance(chunk, list):
+            s = 'while(1);' + s
 
         # In debug mode, we append a newline so when you cURL the API (for
         # example), it looks nicer.
@@ -201,7 +206,7 @@ class ItemsHandler(BaseHandler):
     @tornado.web.removeslash
     def get(self):
         items = list(x.to_dict() for x in Item.select())
-        self.write({'items': items})
+        self.write(items)
 
     @tornado.web.removeslash
     def post(self):
@@ -248,6 +253,12 @@ class ItemHandler(BaseHandler):
         except ValueError:
             self.send_error(400, message='invalid id')
             return
+
+
+class IndexHandler(BaseHandler):
+    def get(self):
+        # TODO: send index.html
+        pass
 
 
 # TODO: Use this to broadcast real-time updates

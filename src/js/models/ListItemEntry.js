@@ -1,6 +1,6 @@
-var Backbone = require('backbone');
+var BaseModel = require('./BaseModel.js');
 
-var ListItemEntry = Backbone.Model.extend({
+var ListItemEntry = BaseModel.extend({
     defaults: {
         text: '',
         checked: false

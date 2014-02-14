@@ -1,6 +1,6 @@
-var Backbone = require('backbone');
+var BaseModel = require('./BaseModel.js');
 
-var BaseItem = Backbone.Model.extend({
+var BaseItem = BaseModel.extend({
     defaults: function() {
         return {
             title: '',
