@@ -163,15 +163,36 @@ class BaseHandler(tornado.web.RequestHandler):
         tornado.web.RequestHandler.write(self, s)
         self.set_header("Content-Type", "application/json; charset=UTF-8")
 
-    def write_error(self, status_code, message, type="invalid_request", **kwargs):
-        resp = dict(kwargs)
-        resp.update({
-            'type': type,
-            'message': message,
-        })
+    def write_error(self, status_code, message='',
+                    type="invalid_request", params=None, exc_info=None,
+                    **kwargs):
+
+        # Build basic error response
+        resp = {'type': type}
+        if len(message) > 0:
+            resp['message'] = message
+        if params is not None:
+            resp['params'] = params
+
+        log.info('foo')
+
+        # If there's an error and we're in debug mode, we also return the
+        # exception that caused it.
+        if exc_info is not None and self.application.settings.get('debug', False):
+            import traceback
+            resp['exception'] = traceback.format_exception(*exc_info)
 
         self.set_status(status_code)
+        self.set_header("Content-Type", "application/json; charset=UTF-8")
         self.write(resp)
+
+
+class ErrorHandler(BaseHandler):
+    def prepare(self):
+        # This is reached when we have an error from the Application - here,
+        # it means that we've reached a route that doesn't match.  We just
+        # return a 404.
+        self.send_error(404, message='unknown method')
 
 
 class ItemsHandler(BaseHandler):
@@ -257,7 +278,9 @@ if __name__ == "__main__":
             (r'/items/([0-9]+)', ItemHandler),
         ],
         static_path=os.path.join(curr_dir, 'build'),
-        debug=options.debug
+        debug=options.debug,
+        default_handler_class=ErrorHandler,
+        default_handler_args={}
     )
 
     Item.create_table(fail_silently=True)
