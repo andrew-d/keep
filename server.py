@@ -137,7 +137,7 @@ class BaseHandler(tornado.web.RequestHandler):
         # Debug settings.
         # TODO: consider making this an explicit option, rather than (just?)
         # relying on debug mode
-        isDebug = self.application.settings.get('debug', False)
+        isDebug = self.settings.get('debug', False)
         if isDebug:
             args['sort_keys'] = True
             args['indent'] = 4
@@ -180,7 +180,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         # If there's an error and we're in debug mode, we also return the
         # exception that caused it.
-        if exc_info is not None and self.application.settings.get('debug', False):
+        if exc_info is not None and self.settings.get('debug', False):
             import traceback
             resp['exception'] = traceback.format_exception(*exc_info)
 
