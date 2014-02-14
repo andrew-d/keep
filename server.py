@@ -135,6 +135,8 @@ class BaseHandler(tornado.web.RequestHandler):
         }
 
         # Debug settings.
+        # TODO: consider making this an explicit option, rather than (just?)
+        # relying on debug mode
         isDebug = self.application.settings.get('debug', False)
         if isDebug:
             args['sort_keys'] = True
@@ -192,7 +194,7 @@ class ErrorHandler(BaseHandler):
         # This is reached when we have an error from the Application - here,
         # it means that we've reached a route that doesn't match.  We just
         # return a 404.
-        self.send_error(404, message='unknown method')
+        self.send_error(404, message='endpoint not found')
 
 
 class ItemsHandler(BaseHandler):
@@ -201,7 +203,19 @@ class ItemsHandler(BaseHandler):
         self.write({'items': items})
 
     def post(self):
-        self.write('add new item')
+        try:
+            new_item = json.loads(self.request.body)
+        except ValueError:
+            self.send_error(400, message='invalid JSON')
+            return
+
+        # Create from dictionary.
+        # TODO: catch errors here and at the .save()
+        new_model = Item.from_dict(new_item)
+
+        # Save
+        new_model.save()
+        self.write(new_model.to_dict())
 
 
 class ItemHandler(BaseHandler):
@@ -224,12 +238,14 @@ class ItemHandler(BaseHandler):
             id = int(id)
         except ValueError:
             self.send_error(400, message='invalid id')
+            return
 
     def delete(self, id):
         try:
             id = int(id)
         except ValueError:
             self.send_error(400, message='invalid id')
+            return
 
 
 # TODO: Use this to broadcast real-time updates
