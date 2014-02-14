@@ -16,6 +16,7 @@ from tornado.options import define, options
 
 
 log = logging.getLogger("keep")
+CURR_DIR = os.path.abspath(os.path.dirname(__file__))
 db_proxy = peewee.Proxy()
 
 
@@ -257,8 +258,9 @@ class ItemHandler(BaseHandler):
 
 class IndexHandler(BaseHandler):
     def get(self):
-        # TODO: send index.html
-        pass
+        with open(os.path.join(CURR_DIR, 'build', 'index.html'), 'rb') as f:
+            data = f.read()
+        self.write(data)
 
 
 # TODO: Use this to broadcast real-time updates
@@ -306,13 +308,13 @@ if __name__ == "__main__":
     db = peewee.SqliteDatabase('./keep.db')
     db_proxy.initialize(db)
 
-    curr_dir = os.path.abspath(os.path.dirname(__file__))
     app = tornado.web.Application([
-            (r'/ws', SocketHandler),
-            (r'/items/?', ItemsHandler),
-            (r'/items/([0-9]+)', ItemHandler),
+            (r'/', IndexHandler),
+            (r'/api/ws', SocketHandler),
+            (r'/api/items/?', ItemsHandler),
+            (r'/api/items/([0-9]+)', ItemHandler),
         ],
-        static_path=os.path.join(curr_dir, 'build'),
+        static_path=os.path.join(CURR_DIR, 'build'),
         debug=options.debug,
         default_handler_class=ErrorHandler,
         default_handler_args={}

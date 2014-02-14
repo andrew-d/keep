@@ -4,7 +4,7 @@ var NoteItem = require('./NoteItem.js');
 var ListItem = require('./ListItem.js');
 
 var ItemCollection = Backbone.Collection.extend({
-    url: '/items',
+    url: '/api/items',
 
     model: function(attrs, options) {
         if( attrs.type === 'note' ) {
