@@ -21,6 +21,7 @@ db_proxy = peewee.Proxy()
 
 
 def utctimestamp():
+    """Returns the Unix time, as in integer, in UTC"""
     return int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
 
 
@@ -58,6 +59,8 @@ class Item(BaseModel):
         else:
             raise ValueError("Unknown type '%s'" % (ty,))
 
+        # TODO: if this is a list, we have multiple items that should be saved,
+        # so perhaps return a list of models?  or a transaction?
         return item
 
     def to_dict(self):
@@ -172,7 +175,7 @@ class BaseHandler(tornado.web.RequestHandler):
              )
 
         # Write the new string.  Also, mimic the original behavior of Tornado
-        # and set the HTTP header.
+        # and set the Content-Type header.
         tornado.web.RequestHandler.write(self, s)
         self.set_header("Content-Type", "application/json; charset=UTF-8")
 
@@ -186,8 +189,6 @@ class BaseHandler(tornado.web.RequestHandler):
             resp['message'] = message
         if params is not None:
             resp['params'] = params
-
-        log.info('foo')
 
         # If there's an error and we're in debug mode, we also return the
         # exception that caused it.
@@ -293,7 +294,8 @@ class ItemHandler(BaseHandler):
             # TODO: update here
             pass
 
-        # TODO: validate the timestamp too?
+        # TODO: validate the timestamp too?  can use to ensure that this item
+        # wasn't trashed by a concurrent update.
         item.save()
 
         # Return item.
@@ -312,6 +314,12 @@ class ItemHandler(BaseHandler):
             self.send_error(404, message='item not found')
         else:
             self.write({'status': 'deleted'})
+
+    def patch(self, id):
+        # TODO: support this?  if so, can refactor some of the code from
+        # PUT handler out into a new function...
+        return self.send_error(405, message='PATCH not currently supported',
+                               type='server_error')
 
 
 class IndexHandler(BaseHandler):
@@ -348,7 +356,7 @@ def add_test_data():
 
     for item in test_data:
         # Generate a timestamp for this item.
-        item['timestamp'] = int(time.time())
+        item['timestamp'] = utctimestamp()
 
         # Create and save it.
         model = Item.from_dict(item)
@@ -381,6 +389,7 @@ if __name__ == "__main__":
     Item.create_table(fail_silently=True)
     ListEntry.create_table(fail_silently=True)
 
+    # TODO: move this to a test script of some sort
     #add_test_data()
 
     # Mimic the SimpleHTTPServer status line
