@@ -3,9 +3,7 @@ from __future__ import print_function
 import os
 import json
 import time
-import uuid
 import logging
-from datetime import datetime
 
 import peewee
 import tornado.ioloop
@@ -14,118 +12,12 @@ import tornado.web
 import tornado.websocket
 from tornado.options import define, options
 
+from .util import utctimestamp, JSONEncoder
+from .models import db_proxy, Item, ListEntry
+
 
 log = logging.getLogger("keep")
 CURR_DIR = os.path.abspath(os.path.dirname(__file__))
-db_proxy = peewee.Proxy()
-
-
-def utctimestamp():
-    """Returns the Unix time, as in integer, in UTC"""
-    return int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
-
-
-class BaseModel(peewee.Model):
-    class Meta:
-        database = db_proxy
-
-
-class Item(BaseModel):
-    id = peewee.PrimaryKeyField()
-    title = peewee.CharField(max_length=140, null=False)
-    type = peewee.CharField(null=False)
-    timestamp = peewee.IntegerField(null=False)
-
-    # Can be null if type != 'note'
-    text = peewee.TextField(null=True)
-
-    @classmethod
-    def from_dict(klass, d):
-        """
-        Creates a new Item from the given dictionary and returns it.
-        Note that the item will not have been saved to the database.
-        """
-        ty = d['type']
-        timestamp = utctimestamp()
-        item = Item(title=d['title'], type=ty, timestamp=timestamp)
-
-        if ty == 'note':
-            item.text = d['text']
-
-        elif ty == 'list':
-            # TODO: add entries
-            pass
-
-        else:
-            raise ValueError("Unknown type '%s'" % (ty,))
-
-        # TODO: if this is a list, we have multiple items that should be saved,
-        # so perhaps return a list of models?  or a transaction?
-        return item
-
-    def to_dict(self):
-        """
-        Serialize this model to a dictionary.
-        """
-        d = {
-            'id': self.id,
-            'type': self.type,
-            'title': self.title,
-            'timestamp': self.timestamp
-        }
-
-        if self.type == 'note':
-            d['text'] = self.text
-
-        elif self.type == 'list':
-            items = [i.to_dict() for i in self.items]
-            d['items'] = items
-
-        else:
-            raise ValueError("Unknown type '%s'" % (self.type,))
-
-        return d
-
-
-class ListEntry(BaseModel):
-    item = peewee.ForeignKeyField(Item, null=False,
-                                  related_name='items')
-    id = peewee.IntegerField(null=False)
-    text = peewee.TextField(null=False)
-    checked = peewee.BooleanField(null=False)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'text': self.text,
-            'checked': self.checked,
-        }
-
-    class Meta:
-        primary_key = peewee.CompositeKey('item', 'id')
-
-
-# ----------------------------------------------------------------------
-
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, datetime):
-            # Convert to time tuple, then format.
-            d = o.utctimetuple()
-
-            # RFC1123 format.  Thanks to Werkzeug for this particular snippet.
-            return '%s, %02d %s %s %02d:%02d:%02d GMT' % (
-                ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')[d.tm_wday],
-                d.tm_mday,
-                ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-                 'Oct', 'Nov', 'Dec')[d.tm_mon - 1],
-                str(d.tm_year), d.tm_hour, d.tm_min, d.tm_sec
-            )
-
-        elif isinstance(o, uuid.UUID):
-            return str(o)
-
-        return json.JSONEncoder.default(self, o)
 
 
 class BaseHandler(tornado.web.RequestHandler):
@@ -341,37 +233,23 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
         pass
 
 
-def add_test_data():
-    test_data = [
-        {'type': 'note', 'title': 'Note 1', 'text': 'Text 1'},
-        {'type': 'note', 'title': 'Note 2', 'text': 'Text 2'},
-        {'type': 'note', 'title': 'Note 3', 'text': 'Text 3'},
-        {'type': 'note', 'title': '', 'text': 'Note with no title'},
-        {'type': 'list', 'title': 'List 1',
-         'items': [{'text': 'foo', 'checked': False},
-                 {'text': 'bar', 'checked': True}],
-        },
-        {'type': 'list', 'title': 'List 2', 'items': []},
-    ]
-
-    for item in test_data:
-        # Generate a timestamp for this item.
-        item['timestamp'] = utctimestamp()
-
-        # Create and save it.
-        model = Item.from_dict(item)
-        model.save()
-
-
 define("debug", default=False, help="Run in debug mode")
 define("address", default='0.0.0.0', help="Address to listen on")
 define("port", default=8888, type=int, help="Listen on the given port")
+define("dbtype", default="sqlite", help="Type of DB to use " +
+                                        "('sqlite' or 'postgres')")
+define("dbpath", default="./keep.db", help="Path to database for SQLite")
 
 
-if __name__ == "__main__":
+def main():
     tornado.options.parse_command_line()
 
-    db = peewee.SqliteDatabase('./keep.db')
+    if options.dbtype == 'sqlite':
+        db = peewee.SqliteDatabase(options.dbpath)
+    elif options.dbtype == 'postgres':
+        # TODO: support me
+        db = None
+
     db_proxy.initialize(db)
 
     app = tornado.web.Application([
@@ -380,17 +258,11 @@ if __name__ == "__main__":
             (r'/api/items/?', ItemsHandler),
             (r'/api/items/([0-9]+)', ItemHandler),
         ],
-        static_path=os.path.join(CURR_DIR, 'build'),
+        static_path=os.path.join(CURR_DIR, '..', 'build'),
         debug=options.debug,
         default_handler_class=ErrorHandler,
         default_handler_args={}
     )
-
-    Item.create_table(fail_silently=True)
-    ListEntry.create_table(fail_silently=True)
-
-    # TODO: move this to a test script of some sort
-    #add_test_data()
 
     # Mimic the SimpleHTTPServer status line
     msg = 'Serving HTTP on %s port %d' % (options.address, options.port)
@@ -400,8 +272,11 @@ if __name__ == "__main__":
 
     # Actually kick off listening
     app.listen(options.port, address=options.address)
+    tornado.ioloop.IOLoop.instance().start()
 
+
+if __name__ == "__main__":
     try:
-        tornado.ioloop.IOLoop.instance().start()
+        main()
     except KeyboardInterrupt:
         pass
