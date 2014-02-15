@@ -5,7 +5,7 @@ import json
 import time
 import uuid
 import logging
-import datetime
+from datetime import datetime
 
 import peewee
 import tornado.ioloop
@@ -18,6 +18,10 @@ from tornado.options import define, options
 log = logging.getLogger("keep")
 CURR_DIR = os.path.abspath(os.path.dirname(__file__))
 db_proxy = peewee.Proxy()
+
+
+def utctimestamp():
+    return int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds())
 
 
 class BaseModel(peewee.Model):
@@ -41,7 +45,8 @@ class Item(BaseModel):
         Note that the item will not have been saved to the database.
         """
         ty = d['type']
-        item = Item(title=d['title'], type=ty, timestamp=d['timestamp'])
+        timestamp = utctimestamp()
+        item = Item(title=d['title'], type=ty, timestamp=timestamp)
 
         if ty == 'note':
             item.text = d['text']
@@ -101,7 +106,7 @@ class ListEntry(BaseModel):
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o, datetime.datetime):
+        if isinstance(o, datetime):
             # Convert to time tuple, then format.
             d = o.utctimetuple()
 
@@ -214,8 +219,7 @@ class ItemsHandler(BaseHandler):
         try:
             new_item = json.loads(self.request.body)
         except ValueError:
-            self.send_error(400, message='invalid JSON')
-            return
+            return self.send_error(400, message='invalid JSON')
 
         # Create from dictionary.
         # TODO: catch errors here and at the .save()
@@ -231,13 +235,12 @@ class ItemHandler(BaseHandler):
         try:
             id = int(id)
         except ValueError:
-            self.send_error(400, message='invalid id')
+            return self.send_error(400, message='invalid id')
 
         try:
             item = Item.select().where(Item.id == id).get()
         except Item.DoesNotExist:
-            self.send_error(404, message='item not found')
-            return
+            return self.send_error(404, message='item not found')
 
         self.write(item.to_dict())
 
@@ -245,15 +248,70 @@ class ItemHandler(BaseHandler):
         try:
             id = int(id)
         except ValueError:
-            self.send_error(400, message='invalid id')
-            return
+            return self.send_error(400, message='invalid id')
+
+        try:
+            new_item = json.loads(self.request.body)
+        except ValueError:
+            return self.send_error(400, message='invalid JSON')
+
+        try:
+            item = Item.select().where(Item.id == id).get()
+        except Item.DoesNotExist:
+            return self.send_error(404, message='item not found')
+
+        # Generate a new timestamp
+        timestamp = utctimestamp()
+
+        # Validate input params.
+        if 'title' not in new_item:
+            return self.send_error(400, message='missing parameter "title"')
+        if 'type' not in new_item:
+            return self.send_error(400, message='missing parameter "type"')
+        if 'type' not in new_item:
+            return self.send_error(400, message='missing parameter "type"')
+
+        ty = new_item['type']
+
+        if ty not in ['note', 'list']:
+            return self.send_error(400, message='invalid parameter "type"')
+
+        if ty == 'note' and 'text' not in new_item:
+            return self.send_error(400, message='missing parameter "text"')
+        elif ty == 'list':
+            # TODO: some sort of check here
+            pass
+
+        # Update the item.
+        item.type = ty
+        item.timestamp = timestamp
+        item.title = new_item['title']
+
+        if ty == 'note':
+            item.text = new_item['text']
+        elif ty == 'list':
+            # TODO: update here
+            pass
+
+        # TODO: validate the timestamp too?
+        item.save()
+
+        # Return item.
+        self.write(item.to_dict())
 
     def delete(self, id):
         try:
             id = int(id)
         except ValueError:
-            self.send_error(400, message='invalid id')
-            return
+            return self.send_error(400, message='invalid id')
+
+        dq = Item.delete().where(Item.id == id)
+        rows_deleted = dq.execute()
+
+        if rows_deleted == 0:
+            self.send_error(404, message='item not found')
+        else:
+            self.write({'status': 'deleted'})
 
 
 class IndexHandler(BaseHandler):
@@ -323,7 +381,7 @@ if __name__ == "__main__":
     Item.create_table(fail_silently=True)
     ListEntry.create_table(fail_silently=True)
 
-    add_test_data()
+    #add_test_data()
 
     # Mimic the SimpleHTTPServer status line
     msg = 'Serving HTTP on %s port %d' % (options.address, options.port)

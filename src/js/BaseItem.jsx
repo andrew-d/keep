@@ -8,8 +8,7 @@ var ListItem = require('./ListItem.jsx');
 
 var BaseItem = React.createBackboneClass({
     handleClose: function() {
-        // TODO: do stuff here
-        console.log('Close ' + this.getModel().id);
+        this.getModel().destroy();
     },
 
     render: function() {
