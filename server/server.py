@@ -28,6 +28,9 @@ class BaseHandler(tornado.web.RequestHandler):
         #   3. If the application is in debug mode or the config flag is set,
         #      we sort the keys, and pretty-print the JSON output.  Otherwise,
         #      we just dump as-is.
+        #   4. If the value we're passed is a list, we prepend the string
+        #      'while(1);' to it, to prevent JSON hijacking.  This gets
+        #      stripped on the client side.
         if not isinstance(chunk, (dict, list)):
             return tornado.web.RequestHandler.write(self, chunk)
 
@@ -216,7 +219,7 @@ class ItemHandler(BaseHandler):
 
 class IndexHandler(BaseHandler):
     def get(self):
-        with open(os.path.join(CURR_DIR, 'build', 'index.html'), 'rb') as f:
+        with open(os.path.join(CURR_DIR, '..', 'build', 'index.html'), 'rb') as f:
             data = f.read()
         self.write(data)
 
