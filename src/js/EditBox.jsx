@@ -34,34 +34,17 @@ var EditBox = React.createClass({
         return false;
     },
 
-    handleFocus: function(e) {
-        this.refs.titleBox.getDOMNode().style.display = '';
-        this.refs.submitButton.getDOMNode().style.display = '';
-        return false;
-    },
-
-    handleBlur: function(e) {
-        // TODO: Figure out if we're to hide this element.
-        // this.refs.titleBox.getDOMNode().style.display = 'none';
-        // this.refs.submitButton.getDOMNode().style.display = 'none';
-        return false;
-    },
-
     render: function() {
-        var noDisplay = {display: 'none'};
         return (
             <form role="form" className="newForm" onSubmit={this.handleSubmit}>
-              <div className="form-group" style={noDisplay} ref="titleBox">
-                <input type="text" className="form-control" onBlur={this.handleBlur}
-                    placeholder="Title" ref="title" />
+              <div className="form-group" ref="titleBox">
+                <input type="text" className="form-control" placeholder="Title" ref="title" />
               </div>
               <div className="form-group">
-                <textarea className="form-control" ref="text"
-                    onFocus={this.handleFocus} onBlur={this.handleBlur}
-                    placeholder="Add note">
+                <textarea className="form-control" ref="text" placeholder="Add note">
                 </textarea>
               </div>
-              <button type="submit" className="btn btn-primary" style={noDisplay} ref='submitButton'>
+              <button type="submit" className="btn btn-primary" ref='submitButton'>
                 Add
               </button>
             </form>
