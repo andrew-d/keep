@@ -101,7 +101,13 @@ gulp.task('static_css', function() {
         .pipe(gulp.dest('build/css/vendor/'));
 });
 
-gulp.task('statics', ['static_html', 'static_css'], function() {
+gulp.task('static_fonts', function() {
+    // Copy vendor fonts
+    return gulp.src(['src/css/fonts/*'])
+        .pipe(gulp.dest('build/css/fonts/'));
+});
+
+gulp.task('statics', ['static_html', 'static_css', 'static_fonts'], function() {
 });
 
 gulp.task('css', function() {
