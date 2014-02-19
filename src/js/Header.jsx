@@ -2,6 +2,8 @@
 var React = require('react');
 var _ = require('underscore')._;
 
+var SyncStatus = require('./SyncStatus.jsx');
+
 var Header = React.createClass({
     getInitialState: function() {
         return {active: null};
@@ -44,6 +46,9 @@ var Header = React.createClass({
                   <ul className="nav navbar-nav">
                     {linkNodes}
                   </ul>
+                  <div className="navbar-text navbar-right">
+                    <SyncStatus />
+                  </div>
                 </div>
               </div>
             </div>

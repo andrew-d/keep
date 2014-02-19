@@ -1,6 +1,8 @@
 /** @jsx React.DOM */
 var React = require('react');
+var Backbone = require('backbone');
 var $ = require('jquery');
+var _ = require('underscore')._;
 
 var Header = require('./Header.jsx');
 var EditBox = require('./EditBox.jsx');
@@ -11,6 +13,18 @@ var ItemCollection = require('./models/ItemCollection.js');
 var Application = React.createClass({
     componentWillMount: function() {
         this.items = new ItemCollection();
+
+        // Proxy synchronization events from this collection to the
+        // global event bus.
+        var self = this;
+        _.each(['request', 'sync', 'error'], function(evt) {
+            self.items.on(evt, function(eventName) {
+                var args = Array.prototype.slice.call(arguments);
+                args.unshift(evt);
+                Backbone.trigger.apply(Backbone, args);
+            });
+        });
+
         this.items.fetch({reset: true});
     },
     render: function() {
