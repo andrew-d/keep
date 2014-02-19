@@ -96,11 +96,7 @@ var EditBox = React.createClass({
             </form>
         );
 
-        return (
-            <div>
-                {theForm}
-            </div>
-        );
+        return theForm;
     }
 });
 
