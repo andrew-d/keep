@@ -117,13 +117,11 @@ class ItemsHandler(BaseHandler):
         except ValueError:
             return self.send_error(400, message='invalid JSON')
 
-        # Create from dictionary.
-        # TODO: catch errors here and at the .save()
-        new_model = Item.from_dict(new_item)
+        # Save all models
+        with db_proxy.transaction():
+            new_item = Item.from_dict(new_item)
 
-        # Save
-        new_model.save()
-        self.write(new_model.to_dict())
+        self.write(new_item.to_dict())
 
 
 class ItemHandler(BaseHandler):

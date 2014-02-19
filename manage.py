@@ -62,8 +62,8 @@ def add_test_data():
         item['timestamp'] = server.util.utctimestamp()
 
         # Create and save it.
-        model = server.models.Item.from_dict(item)
-        model.save()
+        with server.models.db_proxy.transaction():
+            new_item = server.models.Item.from_dict(item)
 
 
 baker.run()

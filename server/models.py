@@ -22,25 +22,34 @@ class Item(BaseModel):
     @classmethod
     def from_dict(klass, d):
         """
-        Creates a new Item from the given dictionary and returns it.
-        Note that the item will not have been saved to the database.
+        Creates a new Item from the given dictionary and returns a
+        list with the first item being the Item instance, and any
+        other items being related models (if any - for example,
+        ListEntry instances).  Saves the models to the database.
         """
         ty = d['type']
-        timestamp = utctimestamp()
-        item = Item(title=d['title'], type=ty, timestamp=timestamp)
-
-        if ty == 'note':
-            item.text = d['text']
-
-        elif ty == 'list':
-            # TODO: add entries
-            pass
-
-        else:
+        if ty not in ['note', 'list']:
             raise ValueError("Unknown type '%s'" % (ty,))
 
-        # TODO: if this is a list, we have multiple items that should be saved,
-        # so perhaps return a list of models?  or a transaction?
+        timestamp = utctimestamp()
+
+        args = {
+            'title': d['title'],
+            'type': ty,
+            'timestamp': timestamp
+        }
+        if ty == 'note':
+            args['title'] = d['text']
+
+        item = Item.create(**args)
+
+        if ty == 'list':
+            for i, subitem in enumerate(d['items']):
+                ListEntry.create(item=item,
+                                 id=i,
+                                 text=subitem['text'],
+                                 checked=subitem['checked'])
+
         return item
 
     def to_dict(self):
