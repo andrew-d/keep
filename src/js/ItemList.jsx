@@ -51,7 +51,12 @@ var ItemList = React.createBackboneClass({
         //var colWidth = $('.item').outerWidth();
         var colWidth = 200;
 
-        if( containerWidth <= 460 ) {
+        // At the point where two columns can't be laid out anymore, we collapse.
+        // This is where the following doesn't have the correct space:
+        //  |margin|<--item-->|margin|<--item-->|margin|
+        var breakpoint = (colWidth * 2) + (marginWidth * 3);
+
+        if( containerWidth <= breakpoint ) {
             // If the total size of the container element is less than some
             // given breakpoint, we should just resize all the elements to the size
             // of the container (with margins) and not worry about this.
@@ -80,7 +85,15 @@ var ItemList = React.createBackboneClass({
         }
 
         // Now, determine how many columns fit in the container.
-        var columnCount = Math.floor(containerWidth / (colWidth + marginWidth*2));
+        // Assuming zero padding, this looks like this:
+        //
+        //     +--------------------------------------------------+
+        //     |margin|    item    |margin|    item    |...|margin|
+        //     +--------------------------------------------------+
+        //
+        // Thus, we subtract the initial margin, and then divide by
+        // (item+margin) to determine the number of columns.
+        var columnCount = Math.floor((containerWidth - marginWidth) / (colWidth + marginWidth));
 
         // We figure out how much space will be "unused" in the container node,
         // given these items, and add that as padding on the left side of the
