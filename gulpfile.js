@@ -88,9 +88,12 @@ gulp.task('vendor', function() {
 });
 
 gulp.task('static_html', function() {
-    // Simply replace the package name in any static files.
+    // Replace thep package name in static files, and add a cache-busting
+    // timestamp query string.
+    var ts = '' + new Date().getTime();
     return gulp.src(['src/index.html'])
         .pipe(replace("@@pkg_name", pkg.name))
+        .pipe(replace("@@timestamp", ts))
         .pipe(gulp.dest('build/'))
         .pipe(refresh(server));
 });
