@@ -1,20 +1,57 @@
 /** @jsx React.DOM */
 var React = require('react');
 var _ = require('react_backbone');
+var marked = require('marked');
 
 
+// TODO: consider listening to the model and caching the rendered
+// markdown so we don't need to do it every time.
 var Item = React.createBackboneClass({
+    componentWillMount: function() {
+        // TODO: highlighting
+        marked.setOptions({
+            renderer: new marked.Renderer(),
+            gfm: true,
+            tables: true,
+            breaks: false,
+            pedantic: false,
+            sanitize: true,
+            smartLists: true,
+            smartypants: false
+        });
+    },
+
     handleClose: function() {
         this.getModel().destroy();
+    },
+
+    handleClick: function(e) {
+        if( e.target.tagName.toLowerCase() !== 'input' ||
+            e.target.type.toLowerCase() !== 'checkbox' )
+        {
+            return;
+        }
+
+        var index = +e.target.attributes['data-item-index'].value;
+
+        // TODO: need to map this back to the original list entry.
+        // Note that this index (as of 2014-03-01) starts from 1,
+        // resetting on each new task list.
+        console.log("checkbox click triggered on index: " + index);
     },
 
     render: function() {
         var item = this.getModel();
 
-        // TODO: make this render Markdown
-        itemBody = (
-            <div className="item-body">
-                {this.getModel().get('text')}
+        var rendered = marked(item.get('text'));
+        var itemBody = (
+            <div
+                className="item-body"
+                onClick={this.handleClick}
+                dangerouslySetInnerHTML={{
+                    __html: rendered
+                }}
+            >
             </div>
         );
 
