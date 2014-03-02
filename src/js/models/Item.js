@@ -1,11 +1,11 @@
 var Backbone = require('backbone');
-var BaseModel = require('./BaseModel.js');
 
-var BaseItem = BaseModel.extend({
+var Item = Backbone.Model.extend({
     defaults: function() {
         return {
             title: '',
             timestamp: 0,
+            text: ''
         };
     },
 
@@ -25,4 +25,4 @@ var BaseItem = BaseModel.extend({
     }
 });
 
-module.exports = BaseItem;
+module.exports = Item;

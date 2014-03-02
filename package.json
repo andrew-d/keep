@@ -43,7 +43,8 @@
     "react": "~0.8.0",
     "sqlite3": "~2.2.0",
     "underscore": "~1.5.2",
-    "validator": "~3.2.1"
+    "validator": "~3.2.1",
+    "marked": "git://github.com/chjj/marked.git"
   },
   "browserify-shim": {}
 }

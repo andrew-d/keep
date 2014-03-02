@@ -13,7 +13,7 @@ import server.models
 import server.util
 
 
-DB_MODELS = [server.models.Item, server.models.ListEntry]
+DB_MODELS = [server.models.Item]
 
 
 def init_db(conn_str, dbtype='sqlite'):
@@ -45,15 +45,10 @@ def dropdb():
 @baker.command
 def add_test_data():
     test_data = [
-        {'type': 'note', 'title': 'Note 1', 'text': 'Text 1'},
-        {'type': 'note', 'title': 'Note 2', 'text': 'Text 2'},
-        {'type': 'note', 'title': 'Note 3', 'text': 'Text 3'},
-        {'type': 'note', 'title': '', 'text': 'Note with no title'},
-        {'type': 'list', 'title': 'List 1',
-         'items': [{'text': 'foo', 'checked': False},
-                 {'text': 'bar', 'checked': True}],
-        },
-        {'type': 'list', 'title': 'List 2', 'items': []},
+        {'title': 'Note 1', 'text': 'Text 1'},
+        {'title': 'Note 2', 'text': 'Text 2'},
+        {'title': 'Note 3', 'text': 'Text 3'},
+        {'title': '', 'text': 'Note with no title'},
     ]
 
     init_db('./keep.db')
@@ -64,6 +59,7 @@ def add_test_data():
         # Create and save it.
         with server.models.db_proxy.transaction():
             new_item = server.models.Item.from_dict(item)
+            new_item.save()
 
 
 baker.run()

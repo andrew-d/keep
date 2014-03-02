@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('react_backbone');
 var _ = require('underscore')._;
 
-var BaseItem = require('./BaseItem.jsx');
+var Item = require('./Item.jsx');
 
 
 var ItemList = React.createBackboneClass({
@@ -12,7 +12,7 @@ var ItemList = React.createBackboneClass({
         var itemNodes = this.getModel().map(function(item) {
             return (
                 <div className="item">
-                    <BaseItem
+                    <Item
                         key={item.id}
                         model={item} />
                 </div>

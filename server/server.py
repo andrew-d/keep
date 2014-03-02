@@ -11,9 +11,10 @@ import tornado.options
 import tornado.web
 import tornado.websocket
 from tornado.options import define, options
+from tornado.util import bytes_type
 
 from .util import utctimestamp, JSONEncoder
-from .models import db_proxy, Item, ListEntry
+from .models import db_proxy, Item
 
 
 log = logging.getLogger("keep")
@@ -112,8 +113,12 @@ class ItemsHandler(BaseHandler):
 
     @tornado.web.removeslash
     def post(self):
+        body = self.request.body
+        if isinstance(self.request.body, bytes_type):
+            body = body.decode('latin-1')
+
         try:
-            new_item = json.loads(self.request.body)
+            new_item = json.loads(body)
         except ValueError:
             return self.send_error(400, message='invalid JSON')
 
@@ -144,8 +149,12 @@ class ItemHandler(BaseHandler):
         except ValueError:
             return self.send_error(400, message='invalid id')
 
+        body = self.request.body
+        if isinstance(self.request.body, bytes_type):
+            body = body.decode('latin-1')
+
         try:
-            new_item = json.loads(self.request.body)
+            new_item = json.loads(body)
         except ValueError:
             return self.send_error(400, message='invalid JSON')
 
@@ -160,32 +169,13 @@ class ItemHandler(BaseHandler):
         # Validate input params.
         if 'title' not in new_item:
             return self.send_error(400, message='missing parameter "title"')
-        if 'type' not in new_item:
-            return self.send_error(400, message='missing parameter "type"')
-        if 'type' not in new_item:
-            return self.send_error(400, message='missing parameter "type"')
-
-        ty = new_item['type']
-
-        if ty not in ['note', 'list']:
-            return self.send_error(400, message='invalid parameter "type"')
-
-        if ty == 'note' and 'text' not in new_item:
+        if 'text' not in new_item:
             return self.send_error(400, message='missing parameter "text"')
-        elif ty == 'list':
-            # TODO: some sort of check here
-            pass
 
         # Update the item.
-        item.type = ty
         item.timestamp = timestamp
         item.title = new_item['title']
-
-        if ty == 'note':
-            item.text = new_item['text']
-        elif ty == 'list':
-            # TODO: update here
-            pass
+        item.text = new_item['text']
 
         # TODO: validate the timestamp too?  can use to ensure that this item
         # wasn't trashed by a concurrent update.

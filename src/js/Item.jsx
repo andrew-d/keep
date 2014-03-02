@@ -2,11 +2,8 @@
 var React = require('react');
 var _ = require('react_backbone');
 
-var NoteItem = require('./NoteItem.jsx');
-var ListItem = require('./ListItem.jsx');
 
-
-var BaseItem = React.createBackboneClass({
+var Item = React.createBackboneClass({
     handleClose: function() {
         this.getModel().destroy();
     },
@@ -14,16 +11,12 @@ var BaseItem = React.createBackboneClass({
     render: function() {
         var item = this.getModel();
 
-        // Depending on the model type, render the appropriate component.
-        var type = item.get('type');
-        var itemBody;
-        if( 'note' === type ) {
-            itemBody = <NoteItem key={item.id} model={item} />;
-        } else if( 'list' === type ) {
-            itemBody = <ListItem key={item.id} model={item} />;
-        } else {
-            itemBody = <p>Unknown item type</p>;
-        }
+        // TODO: make this render Markdown
+        itemBody = (
+            <div className="item-body">
+                {this.getModel().get('text')}
+            </div>
+        );
 
         var closeButton = (
             <div className="pull-right">
@@ -63,4 +56,4 @@ var BaseItem = React.createBackboneClass({
     }
 });
 
-module.exports = BaseItem;
+module.exports = Item;
