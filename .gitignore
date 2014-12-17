@@ -2,3 +2,7 @@ node_modules
 .DS_Store
 *.db
 *.pyc
+gin-bin
+
+# Generated code
+bindata.go
