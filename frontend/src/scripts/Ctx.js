@@ -1,9 +1,8 @@
 var Morearty = require('morearty');
 
 var Ctx = Morearty.createContext({
-    // Global status
+    // Global Socket.IO status
     connected: false,
-    syncing: false,
 
     // Individual notes
     notes: [],

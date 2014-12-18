@@ -8,8 +8,8 @@ var StatusBar = React.createClass({
 
     render: function() {
         var binding = this.getDefaultBinding(),
-            connected = binding.get('connected'),
-            syncing = binding.get('syncing');
+            connected = binding.get('connected');
+            syncing = false;  // TODO: check for unsynchronized notes
 
         var statusEl;
         if( !connected ) {
@@ -17,7 +17,7 @@ var StatusBar = React.createClass({
         } else if( syncing ) {
             statusEl = <span className="label label-primary">Syncing...</span>;
         } else {
-            statusEl = <span className="label label-success">Ready</span>;
+            statusEl = <span className="label label-success">Connected</span>;
         }
 
         return (

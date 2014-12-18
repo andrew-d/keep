@@ -1,13 +1,14 @@
 var React = require('react'),
     Morearty = require('morearty'),
+    Immutable = require('immutable'),
     RouteHandler = require('react-router').RouteHandler;
 
-var path = window.location.protocol + '//' + window.location.host;
-    socket = require('socket.io-client')(path);
-
 var Ctx = require('./Ctx'),
-    StatusBar = require('./StatusBar');
+    socket = require('./socket');
 
+var EditBox = require('./EditBox'),
+    NoteList = require('./NoteList'),
+    StatusBar = require('./StatusBar');
 
 
 var App = React.createClass({
@@ -22,17 +23,22 @@ var App = React.createClass({
         // Init Socket.IO
         var b = Ctx.getBinding();
         socket.on('connect', function() {
-            console.log("Connected to server at: " + path);
+            console.log("Connected to server");
             b.set('connected', true);
-
-            socket.emit("new_posts", [{id: 1}, {id: 2}]);
         });
         socket.on('disconnect', function() {
             console.log("Disconnected from server");
             b.set('connected', false);
         });
-        socket.on('new_posts', function(data) {
-            console.log("New posts: ", data);
+        socket.on('notes added', function(data) {
+            console.log("New notes: ", data);
+
+            // Push these notes on our array.
+            b.update('notes', function(notes) {
+                return notes.concat(Immutable.fromJS(data));
+            });
+
+            // TODO: should check for conflicts in IDs
         });
     },
 
@@ -43,6 +49,14 @@ var App = React.createClass({
                 <div>
                   <StatusBar binding={b} />
                   <div className="container">
+                    <EditBox binding={b} />
+
+                    <hr />
+
+                    {/* Render the list of notes */}
+                    <NoteList binding={b.sub("notes")} />
+
+                    {/* Subroutes are rendered into here */}
                     <RouteHandler binding={b} />
                   </div>
                 </div>

@@ -19,6 +19,16 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Note struct {
+	Id        int64     `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// TODO: support todo lists
+	Title string `json:"title"`
+	Text  string `json:"text"`
+}
+
 var (
 	flagListenHost string
 	flagListenPort uint16
@@ -48,10 +58,7 @@ func init() {
 }
 
 func main() {
-	var err error
-
 	flag.Parse()
-
 	if flagQuiet && flagVerbose {
 		log.Fatalf("Cannot be both quiet and verbose")
 	} else if flagQuiet {
@@ -59,6 +66,8 @@ func main() {
 	} else if flagVerbose {
 		log.Level = logrus.DebugLevel
 	}
+
+	var err error
 
 	log.WithFields(logrus.Fields{
 		"dbtype": flagDbType,
@@ -69,6 +78,9 @@ func main() {
 		log.WithField("error", err).Fatal("Could not open database")
 	}
 	defer db.Close()
+
+	// Create tables, add columns.  Note that this will not delete columns.
+	db.AutoMigrate(&Note{})
 
 	// "nil" means we use the default transports
 	sockServer, err = socketio.NewServer(nil)
@@ -112,15 +124,30 @@ func socketConnected(so socketio.Socket) {
 		}).Info("Socket disconnected")
 	})
 
-	// TODO: broadcast existing posts
-	so.BroadcastTo("keep", "new_posts", []string{
-		"foo",
-		"bar",
+	so.On("add notes", func(d []*Note) {
+		log.WithField("notes", d).Debug("Adding notes")
+
+		// Add to the database
+		newNotes := []*Note{}
+		for _, note := range d {
+			// Only copy over the input fields that we expect.
+			newNote := &Note{
+				Title: note.Title,
+				Text:  note.Text,
+			}
+			newNotes = append(newNotes, newNote)
+			db.Create(newNote)
+		}
+
+		// Good!  Tell everyone we added the notes.
+		sockServer.BroadcastTo("keep", "notes added", newNotes)
 	})
 
-	so.On("new_posts", func(d []map[string]interface{}) {
-		fmt.Printf("%+v\n", d)
-	})
+	// Finally, send all existing notes to this client.
+	notes := []*Note{}
+	db.Find(&notes)
+	log.WithField("notes", notes).Debug("Sending client existing notes")
+	so.Emit("notes added", notes)
 }
 
 func socketError(so socketio.Socket, err error) {

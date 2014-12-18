@@ -19,6 +19,7 @@
   "dependencies": {
     "bluebird": "^2.3.11",
     "immutable": "3.2.1",
+    "jquery": "^1.11.1",
     "lodash-node": "^2.4.1",
     "moment": "^2.8.4",
     "morearty": "^0.7.4",

@@ -2,7 +2,10 @@ node_modules
 .DS_Store
 *.db
 *.pyc
-gin-bin
+
+# Binaries
+/gin-bin
+/keep
 
 # Generated code
 bindata.go
