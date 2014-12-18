@@ -27,7 +27,7 @@ var Note = React.createClass({
         }
 
         return (
-            <div className="item">
+            <div className="col-xs-4">
               <div className="panel panel-default">
                 {itemHeader}
                 <div className="panel-body">

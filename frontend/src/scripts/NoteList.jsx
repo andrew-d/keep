@@ -1,13 +1,19 @@
 var React = require('react'),
+    MasonryMixin = require('react-masonry-mixin'),
     Morearty = require('morearty'),
     $ = require('jquery');
 
 var Note = require('./Note');
 
 
+var masonryOptions = {
+    transitionDuration: 0,
+};
+
+
 var NoteList = React.createClass({
     displayName: 'NoteList',
-    mixins: [Morearty.Mixin],
+    mixins: [Morearty.Mixin, MasonryMixin('masonryContainer', masonryOptions)],
 
     render: function() {
         var b = this.getDefaultBinding(),
@@ -20,12 +26,13 @@ var NoteList = React.createClass({
         };
 
         return (
-            <div className="note-list row">
+            <div className="note-list row" ref="masonryContainer">
               {notes.map(renderNote).toArray()}
             </div>
         );
     },
 
+    /*
     componentDidMount: function(rootNode) {
         // Whenever the window resizes, we need to re-layout the items.
         // TODO: consider using _.debounce or _.throttle to ensure this
@@ -134,6 +141,7 @@ var NoteList = React.createClass({
             blocks[minIndex] += $(item).outerHeight() + marginWidth;
         }
     }
+    */
 });
 
 module.exports = NoteList;

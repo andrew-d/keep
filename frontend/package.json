@@ -24,6 +24,7 @@
     "moment": "^2.8.4",
     "morearty": "^0.7.4",
     "react": "^0.12.1",
+    "react-masonry-mixin": "^0.5.3",
     "react-router": "^0.11.4",
     "socket.io-client": "^1.2.1",
     "superagent": "^0.21.0",
