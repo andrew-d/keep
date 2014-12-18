@@ -1,0 +1,65 @@
+{
+	"ImportPath": "github.com/andrew-d/keep",
+	"GoVersion": "go1.4",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.6.2-5-g7096056",
+			"Rev": "7096056d3cab4d7d11436441f5fc2935cb1cf58c"
+		},
+		{
+			"ImportPath": "github.com/go-sql-driver/mysql",
+			"Comment": "go1",
+			"Rev": "9a7aa3606b82e2081a13a008ada88dfdb96c20fd"
+		},
+		{
+			"ImportPath": "github.com/googollee/go-engine.io",
+			"Rev": "91fdd5067b52eae93a67855e7193ed7a63d7b30d"
+		},
+		{
+			"ImportPath": "github.com/googollee/go-socket.io",
+			"Comment": "0.9.x-11-gd913432",
+			"Rev": "d9134325a87200ffc25def614dc7e39dc534443e"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Rev": "9007e29a7c93fc3dcebbdbf742ce0efaf19e6510"
+		},
+		{
+			"ImportPath": "github.com/jinzhu/gorm",
+			"Rev": "6f2e92e1369ffa2d211c45debb7d7e2ed59a7507"
+		},
+		{
+			"ImportPath": "github.com/julienschmidt/httprouter",
+			"Rev": "91101d17f079ca3c05c6e00354e914a35aa0d3e7"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Rev": "dc911180b321e9b7e08aa94f20939ef0109b9b24"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-sqlite3",
+			"Rev": "c9a0db5d8951646743317f0756da0339fe144dd5"
+		},
+		{
+			"ImportPath": "github.com/ogier/pflag",
+			"Rev": "e4f7d00f344b0954fa3791a8527d10ba7334eceb"
+		},
+		{
+			"ImportPath": "github.com/stretchr/graceful",
+			"Rev": "8e780ba3fe3d3e7ab15fc52e3d60a996587181dc"
+		},
+		{
+			"ImportPath": "github.com/stretchr/pat/stop",
+			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
+		},
+		{
+			"ImportPath": "golang.org/x/net/netutil",
+			"Comment": "null-240",
+			"Rev": "937a34c9de13c766c814510f76bca091dee06028"
+		}
+	]
+}
