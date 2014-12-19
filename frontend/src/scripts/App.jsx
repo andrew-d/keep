@@ -40,6 +40,15 @@ var App = React.createClass({
 
             // TODO: should check for conflicts in IDs
         });
+        socket.on('note deleted', function(id) {
+            console.log("Deleting note:", id);
+
+            b.update('notes', function(notes) {
+                return notes.filter(function(note) {
+                    return note.get('id') !== id;
+                });
+            });
+        });
     },
 
     render: function() {

@@ -143,6 +143,12 @@ func socketConnected(so socketio.Socket) {
 		sockServer.BroadcastTo("keep", "notes added", newNotes)
 	})
 
+	so.On("delete note", func(id int64) {
+		log.WithField("id", id).Debug("Deleting note")
+		db.Delete(&Note{Id: id})
+		sockServer.BroadcastTo("keep", "note deleted", id)
+	})
+
 	// Finally, send all existing notes to this client.
 	notes := []*Note{}
 	db.Find(&notes)

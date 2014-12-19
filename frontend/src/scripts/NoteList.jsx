@@ -1,7 +1,8 @@
 var React = require('react'),
-    MasonryMixin = require('react-masonry-mixin'),
+    Masonry = require('masonry'),
     Morearty = require('morearty'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    throttle = require('lodash-node/modern/functions/throttle');
 
 var Note = require('./Note');
 
@@ -13,7 +14,9 @@ var masonryOptions = {
 
 var NoteList = React.createClass({
     displayName: 'NoteList',
-    mixins: [Morearty.Mixin, MasonryMixin('masonryContainer', masonryOptions)],
+    mixins: [Morearty.Mixin],
+
+    masonry: null,
 
     render: function() {
         var b = this.getDefaultBinding(),
@@ -30,6 +33,47 @@ var NoteList = React.createClass({
               {notes.map(renderNote).toArray()}
             </div>
         );
+    },
+
+    componentDidUpdate: function() {
+        this.layoutNodes();
+    },
+
+    componentDidMount: function() {
+        this.layoutNodes();
+
+        // We want to re-layout nodes whenever the window resizes.
+        this.throttledLayout = throttle(this.layoutNodes, {
+            leading: true,
+            trailing: true,
+        });
+        $(window).on('resize', this.throttledLayout);
+    },
+
+    // Use masonry to layout children
+    layoutNodes: function() {
+        // TODO: this isn't particularly efficient - we destroy and re-create
+        // on every update.
+        this.masonry = new Masonry(this.getDOMNode(), masonryOptions);
+        this.masonry.layout();
+    },
+
+    componentWillUnmount: function() {
+        this.unloadMasonry();
+
+        $(window).off('resize', this.throttledLayout);
+        this.throttledLayout = null;
+    },
+
+    componentWillUpdate: function() {
+        this.unloadMasonry();
+    },
+
+    unloadMasonry: function() {
+        if( !this.masonry ) return;
+
+        this.masonry.destroy();
+        this.masonry = null;
     },
 
     /*

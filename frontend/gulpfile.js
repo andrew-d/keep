@@ -29,7 +29,8 @@ if( gulp.env.production ) {  // i.e. we were executed with a --production option
 var vendorPaths = [
     'es5-shim/es5-sham.js',
     'es5-shim/es5-shim.js',
-    'bootstrap/dist/css/bootstrap.min.css'
+    'bootstrap/dist/css/bootstrap.min.css',
+    'font-awesome/css/font-awesome.min.css',
 ];
 
 // Configuraton for SASS
@@ -65,10 +66,28 @@ gulp.task('sass', function() {
 });
 
 
+// Copy over fonts that Bootstrap expects.
+gulp.task('vendor_fonts', function() {
+    var fontPaths = [
+        'font-awesome/fonts/FontAwesome.otf',
+        'font-awesome/fonts/fontawesome-webfont.eot',
+        'font-awesome/fonts/fontawesome-webfont.svg',
+        'font-awesome/fonts/fontawesome-webfont.ttf',
+        'font-awesome/fonts/fontawesome-webfont.woff',
+    ];
+    var paths = fontPaths.map(function(p) {
+        return path.resolve("./bower_components", p);
+    });
+
+    gulp.src(paths)
+        .pipe(gulp.dest('dist/assets/fonts'));
+});
+
+
 // Some JS and CSS files we want to grab from Bower and put them in a
 // dist/assets/vendor directory.  For example, the es5-sham.js is loaded in the
 // HTML only for IE via a conditional comment.
-gulp.task('vendor', function() {
+gulp.task('vendor', ['vendor_fonts'], function() {
     var paths = vendorPaths.map(function(p) {
         return path.resolve("./bower_components", p);
     });

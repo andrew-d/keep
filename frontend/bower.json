@@ -15,6 +15,8 @@
   ],
   "dependencies": {
     "bootstrap": "~3.3.1",
-    "es5-shim": "~4.0.5"
+    "es5-shim": "~4.0.5",
+    "font-awesome": "~4.2.0",
+    "masonry": "~3.2.2"
   }
 }
