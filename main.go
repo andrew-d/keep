@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/googollee/go-socket.io"
 	"github.com/jinzhu/gorm"
 	"github.com/julienschmidt/httprouter"
+	"github.com/nrandell/go-socket.io"
 	flag "github.com/ogier/pflag"
 	"github.com/stretchr/graceful"
 
