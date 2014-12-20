@@ -1,7 +1,8 @@
 var React = require('react/addons'),
     Morearty = require('morearty');
 
-var socket = require('./socket');
+var Markdown = require('./components/Markdown'),
+    socket = require('./socket');
 
 
 var Note = React.createClass({
@@ -41,7 +42,8 @@ var Note = React.createClass({
                    onMouseLeave={this.handleMouseLeave}>
                 {itemHeader}
                 <div className="panel-body">
-                  {b.get('text')}
+                  <Markdown markdown={b.get('text')}
+                            taskChanged={this.handleTaskChanged} />
                 </div>
                 <div className={footerClasses}>
                   <i className="fa fa-trash" onClick={this.handleDelete}></i>
@@ -49,6 +51,10 @@ var Note = React.createClass({
               </div>
             </div>
         );
+    },
+
+    handleTaskChanged: function(index, value) {
+        console.log("TODO: Should update item " + index + " with state " + value);
     },
 
     // Notes should update when their hover state changes, in addition to the

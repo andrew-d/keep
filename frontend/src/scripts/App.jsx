@@ -35,10 +35,21 @@ var App = React.createClass({
 
             // Push these notes on our array.
             b.update('notes', function(notes) {
-                return notes.concat(Immutable.fromJS(data));
-            });
+                var fromServer = Immutable.fromJS(data);
 
-            // TODO: should check for conflicts in IDs
+                // Get all existing IDs.
+                var seen = {};
+                notes.forEach(function(note) {
+                    seen[note.get('id')] = true;
+                });
+
+                // Add only notes that we haven't seen already.
+                var shouldAdd = fromServer.filter(function(note) {
+                    return seen[note.get('id')] === undefined;
+                });
+
+                return notes.concat(shouldAdd);
+            });
         });
         socket.on('note deleted', function(id) {
             console.log("Deleting note:", id);
