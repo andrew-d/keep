@@ -6,11 +6,6 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "code.google.com/p/go.net/netutil",
-			"Comment": "null-230",
-			"Rev": "15d5d0fa7dd8b1ec3f9370cb3082025163881563"
-		},
-		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.6.2-5-g7096056",
 			"Rev": "7096056d3cab4d7d11436441f5fc2935cb1cf58c"
@@ -86,6 +81,10 @@
 		{
 			"ImportPath": "github.com/stretchr/pat/stop",
 			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
+		},
+		{
+			"ImportPath": "golang.org/x/net/netutil",
+			"Rev": "cbcac7bb8415db9b6cb4d1ebab1dc9afbd688b97"
 		},
 		{
 			"ImportPath": "golang.org/x/text/transform",
