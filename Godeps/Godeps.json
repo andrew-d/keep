@@ -16,9 +16,31 @@
 			"Rev": "7096056d3cab4d7d11436441f5fc2935cb1cf58c"
 		},
 		{
+			"ImportPath": "github.com/blevesearch/bleve",
+			"Rev": "59b014d35b03c5296848a4ce624ce9488ac4f569"
+		},
+		{
+			"ImportPath": "github.com/blevesearch/go-porterstemmer",
+			"Comment": "v1.0.1-5-g9ac2252",
+			"Rev": "9ac2252909b40e1607345cd2f68f76dc98a1c8fa"
+		},
+		{
+			"ImportPath": "github.com/blevesearch/segment",
+			"Rev": "41ada461173c08351f720c90e9a367275cf96a60"
+		},
+		{
+			"ImportPath": "github.com/boltdb/bolt",
+			"Comment": "v1.0-5-g33e7a07",
+			"Rev": "33e7a074e2c470b6d0b7ee23322a1c4cc759044b"
+		},
+		{
 			"ImportPath": "github.com/go-sql-driver/mysql",
 			"Comment": "go1",
 			"Rev": "9a7aa3606b82e2081a13a008ada88dfdb96c20fd"
+		},
+		{
+			"ImportPath": "github.com/golang/protobuf/proto",
+			"Rev": "abd3b412d3c2460d848b6b81478fcb4e542d6327"
 		},
 		{
 			"ImportPath": "github.com/googollee/go-engine.io",
@@ -54,12 +76,24 @@
 			"Rev": "e4f7d00f344b0954fa3791a8527d10ba7334eceb"
 		},
 		{
+			"ImportPath": "github.com/ryszard/goskiplist/skiplist",
+			"Rev": "ab0553cdeff0f191eaa5b7f20df573dc948a4f8d"
+		},
+		{
 			"ImportPath": "github.com/stretchr/graceful",
 			"Rev": "8e780ba3fe3d3e7ab15fc52e3d60a996587181dc"
 		},
 		{
 			"ImportPath": "github.com/stretchr/pat/stop",
 			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
+		},
+		{
+			"ImportPath": "golang.org/x/text/transform",
+			"Rev": "ef0bf1da95d2b971524f971801f2a4c2d0b4841f"
+		},
+		{
+			"ImportPath": "golang.org/x/text/unicode/norm",
+			"Rev": "ef0bf1da95d2b971524f971801f2a4c2d0b4841f"
 		}
 	]
 }

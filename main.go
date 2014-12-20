@@ -23,10 +23,8 @@ type Note struct {
 	Id        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-
-	// TODO: support todo lists
-	Title string `json:"title"`
-	Text  string `json:"text"`
+	Title     string    `json:"title"`
+	Text      string    `json:"text"`
 }
 
 var (
