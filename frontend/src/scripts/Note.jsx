@@ -68,7 +68,7 @@ var Note = React.createClass({
         e.stopPropagation();
 
         var noteId = this.getDefaultBinding().get('id');
-        socket.emit('delete note', noteId);
+        socket.sendMessage('delete note', noteId);
     },
 
     handleMouseEnter: function(e) {

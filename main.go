@@ -8,12 +8,11 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/jinzhu/gorm"
-	"github.com/julienschmidt/httprouter"
-	"github.com/nrandell/go-socket.io"
 	flag "github.com/ogier/pflag"
 	"github.com/stretchr/graceful"
+	"github.com/zenazn/goji/web"
 
+	// Imported for side effects
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -36,9 +35,6 @@ var (
 	flagDbConn     string
 
 	log *logrus.Logger
-
-	db         gorm.DB
-	sockServer *socketio.Server
 
 	httpMethods = []string{"GET", "POST", "PUT", "DELETE", "HEAD", "PATCH", "OPTIONS"}
 )
@@ -65,103 +61,29 @@ func main() {
 		log.Level = logrus.DebugLevel
 	}
 
-	var err error
-
-	log.WithFields(logrus.Fields{
-		"dbtype": flagDbType,
-		"dbconn": flagDbConn,
-	}).Debug("Opening database")
-	db, err = gorm.Open(flagDbType, flagDbConn)
+	mgr, err := NewNoteManager(flagDbType, flagDbConn)
 	if err != nil {
-		log.WithField("error", err).Fatal("Could not open database")
+		log.WithField("error", err).Fatal("Could not create manager")
 	}
-	defer db.Close()
-
-	// Create tables, add columns.  Note that this will not delete columns.
-	db.AutoMigrate(&Note{})
-
-	// "nil" means we use the default transports
-	sockServer, err = socketio.NewServer(nil)
-	if err != nil {
-		log.WithField("error", err).Fatal("Could not create Socket.IO server")
-	}
-
-	// Set up socket.io server
-	sockServer.On("connection", socketConnected)
-	sockServer.On("error", socketError)
 
 	// Our mux
-	router := httprouter.New()
-	router.GET("/", Index)
+	router := web.New()
+	router.Get("/", Index)
+
+	// Dispatch to our manager's SockJS implementation
+	router.Handle("/api/sockjs", mgr.Handler())
+	router.Handle("/api/sockjs/*", mgr.Handler())
 
 	// This custom NotFound handler will try serving a static asset with the
 	// given name.
-	router.NotFound = http.HandlerFunc(NotFound)
-
-	// Register Socket.IO handler
-	for _, meth := range httpMethods {
-		router.Handler(meth, "/socket.io/", sockServer)
-	}
+	router.NotFound(http.HandlerFunc(NotFound))
 
 	addr := fmt.Sprintf("%s:%d", flagListenHost, flagListenPort)
 	log.Infof("Listening on %s", addr)
 	graceful.Run(addr, 10*time.Second, router)
 }
 
-func socketConnected(so socketio.Socket) {
-	log.WithFields(logrus.Fields{
-		"id": so.Id(),
-	}).Info("Socket connected")
-
-	// Join this socket to our main room.
-	so.Join("keep")
-
-	so.On("disconnection", func() {
-		log.WithFields(logrus.Fields{
-			"id": so.Id(),
-		}).Info("Socket disconnected")
-	})
-
-	so.On("add notes", func(d []*Note) {
-		log.WithField("notes", d).Debug("Adding notes")
-
-		// Add to the database
-		newNotes := []*Note{}
-		for _, note := range d {
-			// Only copy over the input fields that we expect.
-			newNote := &Note{
-				Title: note.Title,
-				Text:  note.Text,
-			}
-			newNotes = append(newNotes, newNote)
-			db.Create(newNote)
-		}
-
-		// Good!  Tell everyone we added the notes.
-		sockServer.BroadcastTo("keep", "notes added", newNotes)
-	})
-
-	so.On("delete note", func(id int64) {
-		log.WithField("id", id).Debug("Deleting note")
-		db.Delete(&Note{Id: id})
-		sockServer.BroadcastTo("keep", "note deleted", id)
-	})
-
-	// Finally, send all existing notes to this client.
-	notes := []*Note{}
-	db.Find(&notes)
-	log.WithField("notes", notes).Debug("Sending client existing notes")
-	so.Emit("notes added", notes)
-}
-
-func socketError(so socketio.Socket, err error) {
-	log.WithFields(logrus.Fields{
-		"error": err,
-		"id":    so.Id(),
-	}).Error("Socket.IO error")
-}
-
-func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func Index(w http.ResponseWriter, r *http.Request) {
 	// Send our index page
 	sendAsset(w, "index.html")
 }

@@ -38,10 +38,6 @@
 			"Rev": "abd3b412d3c2460d848b6b81478fcb4e542d6327"
 		},
 		{
-			"ImportPath": "github.com/googollee/go-engine.io",
-			"Rev": "91fdd5067b52eae93a67855e7193ed7a63d7b30d"
-		},
-		{
 			"ImportPath": "github.com/gorilla/websocket",
 			"Rev": "9007e29a7c93fc3dcebbdbf742ce0efaf19e6510"
 		},
@@ -50,21 +46,12 @@
 			"Rev": "6f2e92e1369ffa2d211c45debb7d7e2ed59a7507"
 		},
 		{
-			"ImportPath": "github.com/julienschmidt/httprouter",
-			"Rev": "91101d17f079ca3c05c6e00354e914a35aa0d3e7"
-		},
-		{
 			"ImportPath": "github.com/lib/pq",
 			"Rev": "dc911180b321e9b7e08aa94f20939ef0109b9b24"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-sqlite3",
 			"Rev": "c9a0db5d8951646743317f0756da0339fe144dd5"
-		},
-		{
-			"ImportPath": "github.com/nrandell/go-socket.io",
-			"Comment": "0.9.x-12-g0752969",
-			"Rev": "07529695855b5766b717e92a491a1e8c54cfc547"
 		},
 		{
 			"ImportPath": "github.com/ogier/pflag",
@@ -83,6 +70,11 @@
 			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
 		},
 		{
+			"ImportPath": "github.com/zenazn/goji/web",
+			"Comment": "v0.8.1-15-gb805cb8",
+			"Rev": "b805cb86673cf242ca7cf3546c712eebe3d9985e"
+		},
+		{
 			"ImportPath": "golang.org/x/net/netutil",
 			"Rev": "cbcac7bb8415db9b6cb4d1ebab1dc9afbd688b97"
 		},
@@ -93,6 +85,10 @@
 		{
 			"ImportPath": "golang.org/x/text/unicode/norm",
 			"Rev": "ef0bf1da95d2b971524f971801f2a4c2d0b4841f"
+		},
+		{
+			"ImportPath": "gopkg.in/igm/sockjs-go.v2/sockjs",
+			"Rev": "9dbc79efa97d9a6c6b4a515893bd02c9242e9225"
 		}
 	]
 }

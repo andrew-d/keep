@@ -22,44 +22,64 @@ var App = React.createClass({
 
         // Init Socket.IO
         var b = Ctx.getBinding();
-        socket.on('connect', function() {
+        socket.onopen = function() {
             console.log("Connected to server");
             b.set('connected', true);
-        });
-        socket.on('disconnect', function() {
+        };
+        socket.onclose = function() {
             console.log("Disconnected from server");
+
+            // TODO: reconnect
             b.set('connected', false);
-        });
-        socket.on('notes added', function(data) {
-            console.log("New notes: ", data);
+        };
+        socket.onmessage = function(e) {
+            var spl = e.data.split("|"),
+                ty = spl[0],
+                data = spl.slice(1).join('|');
 
-            // Push these notes on our array.
-            b.update('notes', function(notes) {
-                var fromServer = Immutable.fromJS(data);
+            if( !ty || !data ) return;
 
-                // Get all existing IDs.
-                var seen = {};
-                notes.forEach(function(note) {
-                    seen[note.get('id')] = true;
+            data = JSON.parse(data);
+
+            switch( ty ) {
+            case "notes added":
+                if( !data.length ) break;
+
+                console.log("New notes: ", data);
+
+                // Push these notes on our array.
+                b.update('notes', function(notes) {
+                    var fromServer = Immutable.fromJS(data);
+
+                    // Get all existing IDs.
+                    var seen = {};
+                    notes.forEach(function(note) {
+                        seen[note.get('id')] = true;
+                    });
+
+                    // Add only notes that we haven't seen already.
+                    var shouldAdd = fromServer.filter(function(note) {
+                        return seen[note.get('id')] === undefined;
+                    });
+
+                    return notes.concat(shouldAdd);
                 });
+                break;
 
-                // Add only notes that we haven't seen already.
-                var shouldAdd = fromServer.filter(function(note) {
-                    return seen[note.get('id')] === undefined;
+            case "note deleted":
+                console.log("Deleting note:", data);
+
+                b.update('notes', function(notes) {
+                    return notes.filter(function(note) {
+                        return note.get('id') !== data;
+                    });
                 });
+                break;
 
-                return notes.concat(shouldAdd);
-            });
-        });
-        socket.on('note deleted', function(id) {
-            console.log("Deleting note:", id);
-
-            b.update('notes', function(notes) {
-                return notes.filter(function(note) {
-                    return note.get('id') !== id;
-                });
-            });
-        });
+            default:
+                console.log("Unknown message:", ty);
+            }
+        };
     },
 
     render: function() {

@@ -39,7 +39,7 @@ var EditBox = React.createClass({
         if( !text ) return;
 
         // TODO: optimistically add note
-        socket.emit('add notes', [{
+        socket.sendMessage('add notes', [{
             title: title,
             text:  text,
         }]);
