@@ -185,13 +185,13 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 }
 
 func (mgr *NoteManager) onMessage(conn sockjs.Session) {
-	log.WithFields(logrus.Fields{
-		"id": conn.ID(),
-	}).Info("Client connected")
-
 	// Register this client
 	mgr.clientsLock.Lock()
 	mgr.clients = append(mgr.clients, conn)
+	log.WithFields(logrus.Fields{
+		"id":           conn.ID(),
+		"totalClients": len(mgr.clients),
+	}).Info("Client connected")
 	mgr.clientsLock.Unlock()
 
 	// Send the initial data
@@ -268,12 +268,33 @@ func (mgr *NoteManager) onMessage(conn sockjs.Session) {
 			continue
 		}
 
-		// TODO: unregister client
+		if err != sockjs.ErrSessionNotOpen {
+			log.WithFields(logrus.Fields{
+				"id":    conn.ID(),
+				"error": err,
+			}).Error("Could not receive SockJS message, disconnecting...")
+		}
 
+		// The client disconnected, unregister them.
+		mgr.clientsLock.Lock()
+
+		// Find the client
+		var idx int = -1
+		for i, client := range mgr.clients {
+			if client == conn {
+				idx = i
+			}
+		}
+
+		// Remove it
+		mgr.clients = append(mgr.clients[:idx], mgr.clients[idx+1:]...)
 		log.WithFields(logrus.Fields{
-			"id":    conn.ID(),
-			"error": err,
-		}).Error("Could not receive SockJS message, disconnecting...")
+			"id":           conn.ID(),
+			"totalClients": len(mgr.clients),
+		}).Info("Client disconnected")
+
+		mgr.clientsLock.Unlock()
+
 		break
 	}
 }
