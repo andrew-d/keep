@@ -20,7 +20,7 @@ var App = React.createClass({
         // Debugging
         if( process.env.NODE_ENV !== 'production' ) window.Ctx = Ctx;
 
-        // Init Socket.IO
+        // Init SockJS
         var b = Ctx.getBinding();
         socket.onopen = function() {
             console.log("Connected to server");

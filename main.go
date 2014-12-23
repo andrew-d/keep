@@ -33,6 +33,7 @@ var (
 	flagVerbose    bool
 	flagDbType     string
 	flagDbConn     string
+	flagIndexPath  string
 
 	log *logrus.Logger
 
@@ -46,6 +47,7 @@ func init() {
 	flag.BoolVarP(&flagVerbose, "verbose", "v", false, "be more verbose")
 	flag.StringVar(&flagDbType, "dbtype", "sqlite3", "type of database")
 	flag.StringVar(&flagDbConn, "dbconn", ":memory:", "database connection string")
+	flag.StringVar(&flagIndexPath, "index-path", "", "path to search index")
 
 	log = logrus.New()
 	log.Level = logrus.InfoLevel
@@ -61,7 +63,7 @@ func main() {
 		log.Level = logrus.DebugLevel
 	}
 
-	mgr, err := NewNoteManager(flagDbType, flagDbConn)
+	mgr, err := NewNoteManager(flagDbType, flagDbConn, flagIndexPath)
 	if err != nil {
 		log.WithField("error", err).Fatal("Could not create manager")
 	}

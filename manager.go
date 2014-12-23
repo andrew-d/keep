@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/blevesearch/bleve"
 	"github.com/jinzhu/gorm"
 	"gopkg.in/igm/sockjs-go.v2/sockjs"
 )
@@ -25,11 +26,18 @@ type NoteManager struct {
 	db      gorm.DB
 	handler http.Handler
 
-	// Signalled when the run loop is done
-	done chan struct{}
+	// Indexing
+	index     bleve.Index
+	indexLock sync.RWMutex
+
+	// Signalled to exit everything
+	finish chan struct{}
+
+	// Used to control when things are done
+	wg sync.WaitGroup
 }
 
-func NewNoteManager(dbType, dbConn string) (*NoteManager, error) {
+func NewNoteManager(dbType, dbConn, indexPath string) (*NoteManager, error) {
 	var err error
 
 	log.WithFields(logrus.Fields{
@@ -46,24 +54,55 @@ func NewNoteManager(dbType, dbConn string) (*NoteManager, error) {
 	// Create tables, add columns.  Note that this will not delete columns.
 	db.AutoMigrate(&Note{})
 
+	// Create our index, if we have a path for it.
+	var noteIndex bleve.Index
+	if indexPath != "" {
+		noteIndex, err = bleve.Open(indexPath)
+		if err == bleve.ErrorIndexPathDoesNotExist {
+			log.WithField("path", indexPath).Info("Index does not exist - creating...")
+
+			indexMapping := buildIndexMapping()
+			noteIndex, err = bleve.New(indexPath, indexMapping)
+			if err != nil {
+				log.WithField("error", err).Error("Could not create index")
+				return nil, err
+			}
+		} else if err != nil {
+			log.WithFields(logrus.Fields{
+				"error": err,
+				"path":  indexPath,
+			}).Error("Could not open index")
+			return nil, err
+		} else {
+			log.WithField("path", indexPath).Info("Opened existing index")
+		}
+	} else {
+		log.Info("Not opening or creating index")
+	}
+
 	// Create the final NoteManager.
 	ret := &NoteManager{
 		commands: make(chan interface{}),
 		errors:   make(chan error),
 		db:       db,
-		done:     make(chan struct{}),
+		index:    noteIndex,
 	}
 	ret.handler = sockjs.NewHandler("/api/sockjs", sockjs.DefaultOptions, ret.onMessage)
 
-	// If we get here, everything's good - start the run loop and return okay.
+	// Start the command-processing loop
+	ret.wg.Add(1)
 	go ret.run()
+
+	// Index note data in the background
+	ret.wg.Add(1)
+	go ret.periodicIndex()
+
 	return ret, nil
 }
 
 func (mgr *NoteManager) Close() error {
-	// Ensure the run loop is stopped before we close resources
-	close(mgr.commands)
-	<-mgr.done
+	// Wait for background goroutines to finish.
+	mgr.wg.Wait()
 
 	// Shut down all clients
 	mgr.clientsLock.Lock()
@@ -74,7 +113,7 @@ func (mgr *NoteManager) Close() error {
 	mgr.clients = nil
 	mgr.clientsLock.Unlock()
 
-	// Close the DB
+	// Close all remaining resources
 	mgr.db.Close()
 	return nil
 }
@@ -84,21 +123,18 @@ func (mgr *NoteManager) Handler() http.Handler {
 }
 
 func (mgr *NoteManager) run() {
+	defer mgr.wg.Done()
+
 	var cmd interface{}
-	var ok bool
 
 	for {
 		select {
-		case cmd, ok = <-mgr.commands:
-			if !ok {
-				break
-			}
+		case cmd = <-mgr.commands:
 			mgr.errors <- mgr.processCmd(cmd)
+		case <-mgr.finish:
+			return
 		}
 	}
-
-	// This indicates our run loop is done
-	close(mgr.done)
 }
 
 func (mgr *NoteManager) processCmd(cmd interface{}) error {
