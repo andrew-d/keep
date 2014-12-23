@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"mime"
 	"net/http"
@@ -76,6 +77,32 @@ func main() {
 	// Our mux
 	router := web.New()
 	router.Get("/", Index)
+	router.Get("/api/search", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query().Get("q")
+		if len(q) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status": "error",
+				"error":  "no query given",
+			})
+			return
+		}
+
+		notes, err := mgr.Search(q)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"status": "error",
+				"error":  err.Error(),
+			})
+			return
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "success",
+			"notes":  notes,
+		})
+	})
 
 	// Dispatch to our manager's SockJS implementation
 	router.Handle("/api/sockjs", mgr.Handler())

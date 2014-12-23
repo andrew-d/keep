@@ -119,3 +119,47 @@ func (mgr *NoteManager) doIndex() error {
 
 	return nil
 }
+
+func (mgr *NoteManager) Search(query string) ([]*Note, error) {
+	mgr.indexLock.RLock()
+	log.WithField("query", query).Debug("Running query")
+
+	bquery := bleve.NewQueryStringQuery(query)
+	req := bleve.NewSearchRequest(bquery)
+
+	results, err := mgr.index.Search(req)
+	if err != nil {
+		mgr.indexLock.RUnlock()
+		return nil, err
+	}
+
+	// Loop over each match and get the IDs
+	// TODO: sort by score
+	noteIds := []int64{}
+	for _, hit := range results.Hits {
+		id, err := strconv.ParseInt(hit.ID, 10, 64)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"error": err,
+				"id":    hit.ID,
+			}).Warn("Invalid ID in search results")
+			continue
+		}
+
+		noteIds = append(noteIds, id)
+	}
+
+	// We're done with the index now
+	mgr.indexLock.RUnlock()
+	log.WithFields(logrus.Fields{
+		"results": noteIds,
+		"total":   results.Total,
+		"took":    results.Took,
+	}).Debug("Search complete")
+
+	// Load these notes
+	var notes []*Note
+	mgr.db.Where("id in (?)", noteIds).Find(&notes)
+
+	return notes, nil
+}
