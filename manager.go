@@ -195,8 +195,8 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 		var note Note
 		mgr.db.Find(&note, v.Id)
 
-		// If the revision isn't correct, then we do nothing
 		if note.Revision == v.Revision {
+			// Revision is correct - update the note
 			note.Title = v.Title
 			note.Text = v.Text
 			note.Revision++
@@ -206,6 +206,7 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 			responseMessage = msgNoteModified
 			responseObject = &note
 		} else {
+			// Revision is incorrect - create a "conflict" note.
 			newNote := &Note{
 				Title:    v.Title + " (conflict)",
 				Text:     v.Text,

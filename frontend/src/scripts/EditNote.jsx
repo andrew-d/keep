@@ -3,9 +3,10 @@ var React = require('react'),
     Router = require('react-router'),
     $ = require('jquery');
 
-
 // Required for side effects.
 require('imports?jQuery=jquery!jquery-autosize');
+
+var socket = require('./socket');
 
 
 var EditModal = React.createClass({
@@ -34,6 +35,7 @@ var EditModal = React.createClass({
                       <span aria-hidden="true">&times;</span>
                   </button>
                   <h4 className="modal-title">{binding.get('title')}</h4>
+                  <input type="hidden" ref="title" value={binding.get('title')} />
                 </div>
                 <div className="modal-body">
                   <textarea className="form-control" ref="text" defaultValue={binding.get('text')}></textarea>
@@ -54,7 +56,16 @@ var EditModal = React.createClass({
     handleSave: function(e) {
         console.log("Should save changes");
 
-        // this.props.closeModal();
+        var binding = this.getDefaultBinding();
+
+        socket.sendMessage('modify note', {
+            id:       binding.get('id'),
+            title:    this.refs.title.getDOMNode().value,
+            text:     this.refs.text.getDOMNode().value,
+            revision: binding.get('revision'),
+        });
+
+        this.props.closeModal();
     },
 });
 

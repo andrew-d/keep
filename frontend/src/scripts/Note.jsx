@@ -24,7 +24,7 @@ var Note = React.createClass({
 
         if( title ) {
             itemHeader = (
-                <div className="panel-heading" onClick={this.handleClick}>
+                <div className="panel-heading">
                   <b>{title}</b>
                 </div>
             );
@@ -42,12 +42,19 @@ var Note = React.createClass({
                    onMouseEnter={this.handleMouseEnter}
                    onMouseLeave={this.handleMouseLeave}>
                 {itemHeader}
-                <div className="panel-body" onClick={this.handleClick}>
+                <div className="panel-body">
                   <Markdown markdown={b.get('text')}
                             taskChanged={this.handleTaskChanged} />
                 </div>
                 <div className={footerClasses}>
-                  <i className="fa fa-trash" onClick={this.handleDelete}></i>
+                  <div className="btn-group">
+                    <a className="btn btn-default" onClick={this.handleDelete}>
+                      <i className="fa fa-lg fa-trash"></i>
+                    </a>
+                    <a className="btn btn-default" onClick={this.handleEdit}>
+                      <i className="fa fa-lg fa-edit"></i>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -68,8 +75,11 @@ var Note = React.createClass({
         e.preventDefault();
         e.stopPropagation();
 
-        var noteId = this.getDefaultBinding().get('id');
-        socket.sendMessage('delete note', noteId);
+        var binding = this.getDefaultBinding();
+        socket.sendMessage('delete note', {
+            id:       binding.get('id'),
+            revision: binding.get('revision'),
+        });
     },
 
     handleMouseEnter: function(e) {
@@ -80,7 +90,7 @@ var Note = React.createClass({
         this.setState({hover: false});
     },
 
-    handleClick: function(e) {
+    handleEdit: function(e) {
         this.transitionTo('edit-note', {note_id: this.getDefaultBinding().get('id')});
     },
 });

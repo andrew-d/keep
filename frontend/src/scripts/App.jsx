@@ -76,6 +76,20 @@ var App = React.createClass({
                 });
                 break;
 
+            case "note modified":
+                console.log("Note modified:", data);
+
+                b.update('notes', function(notes) {
+                    return notes.map(function(note) {
+                        if( note.get('id') === data.id ) {
+                            return Immutable.fromJS(data);
+                        } else {
+                            return note;
+                        }
+                    });
+                });
+                break;
+
             default:
                 console.log("Unknown message:", ty);
             }
