@@ -86,6 +86,7 @@ func NewNoteManager(dbType, dbConn, indexPath string) (*NoteManager, error) {
 		errors:   make(chan error),
 		db:       db,
 		index:    noteIndex,
+		finish:   make(chan struct{}),
 	}
 	ret.handler = sockjs.NewHandler("/api/sockjs", sockjs.DefaultOptions, ret.onMessage)
 
@@ -94,14 +95,17 @@ func NewNoteManager(dbType, dbConn, indexPath string) (*NoteManager, error) {
 	go ret.run()
 
 	// Index note data in the background
-	ret.wg.Add(1)
-	go ret.periodicIndex()
+	if indexPath != "" {
+		ret.wg.Add(1)
+		go ret.periodicIndex()
+	}
 
 	return ret, nil
 }
 
 func (mgr *NoteManager) Close() error {
 	// Wait for background goroutines to finish.
+	close(mgr.finish)
 	mgr.wg.Wait()
 
 	// Shut down all clients
@@ -141,7 +145,6 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 	var responseMessage string
 	var responseObject interface{}
 
-	log.WithField("cmd", cmd).Debug("Got command")
 	switch v := cmd.(type) {
 	case cmdAddNotes:
 		// Add to the database
@@ -149,8 +152,9 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 		for _, note := range v.Notes {
 			// Only copy over the input fields that we expect.
 			newNote := &Note{
-				Title: note.Title,
-				Text:  note.Text,
+				Title:    note.Title,
+				Text:     note.Text,
+				Revision: 1,
 			}
 			newNotes = append(newNotes, newNote)
 			mgr.db.Create(newNote)
@@ -162,11 +166,57 @@ func (mgr *NoteManager) processCmd(cmd interface{}) error {
 		responseObject = &newNotes
 
 	case cmdDeleteNote:
-		log.WithField("id", v.Id).Debug("Deleting note")
-		mgr.db.Delete(&Note{Id: v.Id})
+		log.WithFields(logrus.Fields{
+			"id":       v.Id,
+			"revision": v.Revision,
+		}).Debug("Deleting note")
 
-		responseMessage = msgNoteDeleted
-		responseObject = v.Id
+		// Load the note with the given ID.
+		var note Note
+		mgr.db.Find(&note, v.Id)
+
+		// If the revision isn't correct, then we do nothing
+		if note.Revision == v.Revision {
+			mgr.db.Delete(&note)
+
+			responseMessage = msgNoteDeleted
+			responseObject = v.Id
+		} else {
+			// TODO: what message should we return?
+		}
+
+	case cmdModifyNote:
+		log.WithFields(logrus.Fields{
+			"id":       v.Id,
+			"revision": v.Revision,
+		}).Debug("Modifying note")
+
+		// Load the note with the given ID.
+		var note Note
+		mgr.db.Find(&note, v.Id)
+
+		// If the revision isn't correct, then we do nothing
+		if note.Revision == v.Revision {
+			note.Title = v.Title
+			note.Text = v.Text
+			note.Revision++
+
+			mgr.db.Save(&note)
+
+			responseMessage = msgNoteModified
+			responseObject = &note
+		} else {
+			newNote := &Note{
+				Title:    v.Title + " (conflict)",
+				Text:     v.Text,
+				Revision: v.Revision + 1,
+			}
+
+			mgr.db.Create(newNote)
+
+			responseMessage = msgNotesAdded
+			responseObject = []*Note{newNote}
+		}
 
 	default:
 		return errors.New("unknown command")
@@ -222,8 +272,6 @@ func (mgr *NoteManager) onMessage(conn sockjs.Session) {
 			var command interface{}
 			switch ty {
 			case msgAddNotes:
-				log.Debug("Add note command")
-
 				var msg []*Note
 				err = json.Unmarshal(data, &msg)
 				if err != nil {
@@ -237,9 +285,8 @@ func (mgr *NoteManager) onMessage(conn sockjs.Session) {
 				command = cmdAddNotes{Notes: msg}
 
 			case msgDeleteNote:
-				log.Debug("Delete note command")
+				var msg cmdDeleteNote
 
-				var msg int64
 				err = json.Unmarshal(data, &msg)
 				if err != nil {
 					log.WithFields(logrus.Fields{
@@ -249,7 +296,21 @@ func (mgr *NoteManager) onMessage(conn sockjs.Session) {
 					break
 				}
 
-				command = cmdDeleteNote{msg}
+				command = msg
+
+			case msgModifyNote:
+				var msg cmdModifyNote
+
+				err = json.Unmarshal(data, &msg)
+				if err != nil {
+					log.WithFields(logrus.Fields{
+						"id":    conn.ID(),
+						"error": err,
+					}).Warn("Could not decode modify note JSON")
+					break
+				}
+
+				command = msg
 
 			default:
 				log.WithFields(logrus.Fields{

@@ -20,11 +20,13 @@ import (
 )
 
 type Note struct {
-	Id        int64     `json:"id"`
+	Id       int64  `json:"id"`
+	Title    string `json:"title"`
+	Text     string `json:"text"`
+	Revision int64  `json:"revision"`
+
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Title     string    `json:"title"`
-	Text      string    `json:"text"`
 }
 
 var (

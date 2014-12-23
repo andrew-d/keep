@@ -70,6 +70,10 @@
 			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
 		},
 		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Rev": "2eaa4b48b8954bf871229043b8064ca156a542a5"
+		},
+		{
 			"ImportPath": "github.com/zenazn/goji/web",
 			"Comment": "v0.8.1-15-gb805cb8",
 			"Rev": "b805cb86673cf242ca7cf3546c712eebe3d9985e"
