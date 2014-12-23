@@ -1,5 +1,6 @@
 var React = require('react/addons'),
-    Morearty = require('morearty');
+    Morearty = require('morearty'),
+    Router = require('react-router');
 
 var Markdown = require('./components/Markdown'),
     socket = require('./socket');
@@ -7,7 +8,7 @@ var Markdown = require('./components/Markdown'),
 
 var Note = React.createClass({
     displayName: 'Note',
-    mixins: [Morearty.Mixin],
+    mixins: [Morearty.Mixin, Router.Navigation],
 
     getInitialState: function() {
         return {
@@ -23,7 +24,7 @@ var Note = React.createClass({
 
         if( title ) {
             itemHeader = (
-                <div className="panel-heading">
+                <div className="panel-heading" onClick={this.handleClick}>
                   <b>{title}</b>
                 </div>
             );
@@ -41,7 +42,7 @@ var Note = React.createClass({
                    onMouseEnter={this.handleMouseEnter}
                    onMouseLeave={this.handleMouseLeave}>
                 {itemHeader}
-                <div className="panel-body">
+                <div className="panel-body" onClick={this.handleClick}>
                   <Markdown markdown={b.get('text')}
                             taskChanged={this.handleTaskChanged} />
                 </div>
@@ -77,6 +78,10 @@ var Note = React.createClass({
 
     handleMouseLeave: function(e) {
         this.setState({hover: false});
+    },
+
+    handleClick: function(e) {
+        this.transitionTo('edit-note', {note_id: this.getDefaultBinding().get('id')});
     },
 });
 
