@@ -20,6 +20,7 @@
     "bluebird": "^2.3.11",
     "immutable": "3.2.1",
     "jquery": "^1.11.1",
+    "jquery-autosize": "^1.18.17",
     "lodash-node": "^2.4.1",
     "marked": "^0.3.2",
     "moment": "^2.8.4",
