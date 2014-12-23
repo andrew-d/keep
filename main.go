@@ -38,6 +38,9 @@ var (
 	log *logrus.Logger
 
 	httpMethods = []string{"GET", "POST", "PUT", "DELETE", "HEAD", "PATCH", "OPTIONS"}
+
+	// Set by build script
+	buildCommit string
 )
 
 func init() {
@@ -62,6 +65,8 @@ func main() {
 	} else if flagVerbose {
 		log.Level = logrus.DebugLevel
 	}
+
+	log.Infof("keep starting (build commit %s)", buildCommit)
 
 	mgr, err := NewNoteManager(flagDbType, flagDbConn, flagIndexPath)
 	if err != nil {
