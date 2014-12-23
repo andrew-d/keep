@@ -22,7 +22,6 @@ var webpackConfig = require("./webpack.config.js");
 if( gulp.env.production ) {  // i.e. we were executed with a --production option
     webpackConfig.plugins = webpackConfig.plugins.concat(
         new webpack.optimize.UglifyJsPlugin());
-    webpackConfig.output.filename = "main-[hash].js";
 }
 
 // Paths to files in bower_components that should be copied to dist/assets/vendor
@@ -60,7 +59,6 @@ gulp.task('sass', function() {
                 remove: true,
            }))
           .pipe(gulp.env.production ? minifyCSS() : gutil.noop())
-          .pipe(gulp.env.production ? rev()       : gutil.noop())
           .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist/assets'))
 });
