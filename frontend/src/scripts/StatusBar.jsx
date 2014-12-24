@@ -1,10 +1,11 @@
 var React = require('react'),
+    Router = require('react-router'),
     Morearty = require('morearty');
 
 
 var StatusBar = React.createClass({
     displayName: 'StatusBar',
-    mixins: [Morearty.Mixin],
+    mixins: [Morearty.Mixin, Router.Navigation],
 
     render: function() {
         var binding = this.getDefaultBinding(),
@@ -24,22 +25,29 @@ var StatusBar = React.createClass({
           <nav className="navbar navbar-default navbar-static-top" role="navigation">
             <div className="container">
               <div className="navbar-header">
-                <button type="button" className="navbar-toggle collapsed"
-                        data-toggle="collapse" data-target="#navbar"
-                        aria-expanded="false" aria-controls="navbar">
-                  <span className="sr-only">Toggle navigation</span>
-                  <span className="icon-bar"></span>
-                  <span className="icon-bar"></span>
-                  <span className="icon-bar"></span>
-                </button>
                 <a className="navbar-brand" href="">Keep</a>
               </div>
+
+              <form className="navbar-form navbar-left" role="search">
+                <div className="form-group">
+                  <input type="text" className="form-control" ref="searchText" placeholder="Search" />
+                </div>
+                <button type="submit" className="btn btn-default" onClick={this.handleSearch}>Search</button>
+              </form>
+
               <p className="navbar-text navbar-right">
                 Status: {statusEl}
               </p>
             </div>
           </nav>
         );
+    },
+
+    handleSearch: function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("Would search for:", this.refs.searchText.getDOMNode().value);
     },
 });
 
