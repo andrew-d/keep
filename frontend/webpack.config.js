@@ -36,6 +36,11 @@ module.exports = {
 
             // Process JSX with some ES6 features
             { test: /\.jsx$/, loader: "jsx-loader?harmony" },
+
+            // Convert ES6 --> ES5
+            { test: /\.js$/, exclude: /node_modules/, loader: "6to5-loader" },
+
+            // Save JSON files in the bundle too
             { test: /\.json$/, loader: "json" },
         ],
 
