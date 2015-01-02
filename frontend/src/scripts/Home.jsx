@@ -1,10 +1,9 @@
-var React = require('react');
+var React = require('react'),
+    component = require('omniscient');
 
 
-var Home = React.createClass({
-	render: function() {
-		return <div></div>;
-	},
+var Home = component('Home', function() {
+    return <div></div>;
 });
 
 module.exports = Home;

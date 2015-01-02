@@ -1,6 +1,6 @@
 var // path = window.location.protocol + '//' + window.location.host;
 	path = '/api/sockjs',
-    extend = require('lodash-node/modern/objects/assign');
+    extend = require('lodash-node/modern/objects/assign'),
     events = require('events'),
     sockjs = require('sockjs-client');
 
@@ -78,6 +78,10 @@ class ReconnectingSocket extends events.EventEmitter {
     reset_reconnect() {
         this._reconnecting = false;
         // TODO: reset reconnect count
+    }
+
+    try_reconnect(connfunc) {
+        // TODO
     }
 
     update_status() {

@@ -7,16 +7,17 @@ var Route = Router.Route,
     Link = Router.Link,
     RouteHandler = Router.RouteHandler;
 
-var App = require('./App'),
-	Home = require('./Home'),
-	EditNote = require('./EditNote');
+var App = require('./App').jsx,
+	Home = require('./Home').jsx;
+	//EditNote = require('./EditNote');
 
 
 var routes = (
     <Route name="app" handler={App} path="/">
         <DefaultRoute name="index" handler={Home} />
-        <Route name="edit-note" handler={EditNote} path="/notes/:note_id" />
+        {/* <Route name="edit-note" handler={EditNote} path="/notes/:note_id" /> */}
     </Route>
 );
+
 
 module.exports = routes;
