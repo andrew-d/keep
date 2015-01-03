@@ -1,5 +1,5 @@
 var // path = window.location.protocol + '//' + window.location.host;
-	path = '/api/sockjs',
+    path = '/api/sockjs',
     extend = require('lodash-node/modern/objects/assign'),
     events = require('events'),
     sockjs = require('sockjs-client');
@@ -152,7 +152,7 @@ socket.onopen = function() {
  * Helper method that sends a message type, and then a JSON-encoded object.
  */
 socket.sendMessage = function(ty, obj) {
-	return this.send(ty + "|" + JSON.stringify(obj));
+    return this.send(ty + "|" + JSON.stringify(obj));
 };
 
 module.exports = socket;

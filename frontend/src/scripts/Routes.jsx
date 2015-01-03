@@ -8,8 +8,8 @@ var Route = Router.Route,
     RouteHandler = Router.RouteHandler;
 
 var App = require('./App').jsx,
-	Home = require('./Home').jsx;
-	//EditNote = require('./EditNote');
+    Home = require('./Home').jsx;
+    //EditNote = require('./EditNote');
 
 
 var routes = (
