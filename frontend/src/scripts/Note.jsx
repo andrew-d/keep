@@ -1,11 +1,41 @@
 var React = require('react/addons'),
-    component = require('omniscient');
+    component = require('omniscient')
+    $ = require('jquery');
 
 
-var Note = component('Note', function(props) {
+var HoverMixin = {
+    getInitialState: function() {
+        return {hover: false};
+    },
+
+    componentDidMount: function() {
+        var $el = $(this.getDOMNode());
+
+        $el.on('mouseenter', this.handleMouseEnter);
+        $el.on('mouseleave', this.handleMouseLeave);
+    },
+
+    componentWillUnmount: function() {
+        var $el = $(this.getDOMNode());
+
+        $el.off('mouseenter', this.handleMouseEnter);
+        $el.off('mouseleave', this.handleMouseLeave);
+    },
+
+    handleMouseEnter: function(e) {
+        this.setState({hover: true});
+    },
+
+    handleMouseLeave: function(e) {
+        this.setState({hover: false});
+    },
+};
+
+
+var Note = component('Note', HoverMixin, function(props) {
     var note = props.note.deref(),
         title = note.get('title'),
-        hover = note.get('hover') || false,
+        hover = this.state.hover,
         itemHeader = null;
 
     if( title ) {
@@ -22,16 +52,6 @@ var Note = component('Note', function(props) {
         // TODO: fade in/out?
     });
 
-    // TODO: for some reason, mouse(enter|exit) doesn't work unless we're clicking.
-
-    var handleMouseEnter = () => {
-        props.note.set('hover', true);
-    };
-
-    var handleMouseLeave = () => {
-        props.note.set('hover', false);
-    };
-
     var handleDelete = () => {
         console.log("Should delete note:", note.toJS());
     };
@@ -42,12 +62,10 @@ var Note = component('Note', function(props) {
 
     return (
         <div className="col-md-4 col-sm-6 col-xs-12">
-          <div className="panel panel-default"
-               onMouseEnter={handleMouseEnter}
-               onMouseLeave={handleMouseLeave}>
+          <div className="panel panel-default">
             {itemHeader}
             <div className="panel-body">
-                TODO: note body goes here
+              {note.get('text')}
             </div>
             <div className={footerClasses}>
               <div className="btn-group">
