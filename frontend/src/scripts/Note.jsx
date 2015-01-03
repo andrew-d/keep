@@ -1,10 +1,11 @@
-var React = require('react'),
+var React = require('react/addons'),
     component = require('omniscient');
 
 
 var Note = component('Note', function(props) {
-    var note = prop.note.deref(),
+    var note = props.note.deref(),
         title = note.get('title'),
+        hover = note.get('hover') || false,
         itemHeader = null;
 
     if( title ) {
@@ -17,16 +18,18 @@ var Note = component('Note', function(props) {
 
     var footerClasses = React.addons.classSet({
         'panel-footer': true,
-        'invisible':    !this.state.hover,
+        'invisible':    !hover,
         // TODO: fade in/out?
     });
 
+    // TODO: for some reason, mouse(enter|exit) doesn't work unless we're clicking.
+
     var handleMouseEnter = () => {
-        this.setState({hover: true});
+        props.note.set('hover', true);
     };
 
-    var handleMouseExit = () => {
-        this.setState({hover: false});
+    var handleMouseLeave = () => {
+        props.note.set('hover', false);
     };
 
     var handleDelete = () => {

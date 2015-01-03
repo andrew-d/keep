@@ -6,7 +6,7 @@ var data = immstruct({
 	connected: false,
 
 	// Notes to display (of type text or list)
-	notes: [],
+	notes: [{id: 1, title:"foo", text:"bar"}],
 });
 
 

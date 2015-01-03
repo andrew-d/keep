@@ -11,7 +11,9 @@ var App = require('./scripts/App'),
 var rerender = function rerender(structure, el) {
 	var Handler, state;
 	var render = function render(h, s) {
-		if (h) Handler = h;
+		// TODO: this is b0rked
+		/////if (h) Handler = h;
+		if (!Handler) Handler = h;
 		if (s) state = s;
 
 		React.render(<Handler cursor={structure.cursor()} statics={state} />, el);

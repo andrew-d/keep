@@ -61,7 +61,7 @@ var MasonryMixin = {
 
 var NoteList = component('NoteList', MasonryMixin, function(props) {
     var renderNote = function(note, index) {
-        var noteBinding = props.notes.cursor(index);
+        var noteBinding = props.notes.get(index);
         return <Note key={index} note={noteBinding} />;
     };
 
