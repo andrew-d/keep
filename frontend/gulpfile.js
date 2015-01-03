@@ -26,8 +26,6 @@ if( gulp.env.production ) {  // i.e. we were executed with a --production option
 
 // Paths to files in bower_components that should be copied to dist/assets/vendor
 var vendorPaths = [
-    'es5-shim/es5-sham.js',
-    'es5-shim/es5-shim.js',
     'bootstrap/dist/css/bootstrap.min.css',
     'font-awesome/css/font-awesome.min.css',
 ];
@@ -83,8 +81,7 @@ gulp.task('vendor_fonts', function() {
 
 
 // Some JS and CSS files we want to grab from Bower and put them in a
-// dist/assets/vendor directory.  For example, the es5-sham.js is loaded in the
-// HTML only for IE via a conditional comment.
+// dist/assets/vendor directory.
 gulp.task('vendor', ['vendor_fonts'], function() {
     var paths = vendorPaths.map(function(p) {
         return path.resolve("./bower_components", p);

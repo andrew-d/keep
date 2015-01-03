@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/andrew-d/docstore",
   "dependencies": {
+    "es5-shim": "^4.0.5",
     "immstruct": "^1.2.1",
     "immutable": "^3.2.1",
     "jquery": "^1.11.1",
