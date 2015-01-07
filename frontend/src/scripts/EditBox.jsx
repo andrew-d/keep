@@ -1,6 +1,8 @@
 var React = require('react'),
     component = require('omniscient');
 
+var actions = require('./actions');
+
 
 var EditBox = component('EditBox', function() {
     var handleSubmit = (e) => {
@@ -9,7 +11,8 @@ var EditBox = component('EditBox', function() {
         var title = this.refs.title.getDOMNode().value.trim(),
             text = this.refs.text.getDOMNode().value.trim();
 
-        console.log("Would submit new note", title, text);
+        // console.log("Would submit new note", title, text);
+        actions.createNote(title, text);
     };
 
     return (

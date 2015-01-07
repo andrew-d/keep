@@ -2,6 +2,8 @@ var React = require('react/addons'),
     component = require('omniscient')
     $ = require('jquery');
 
+var actions = require('./actions');
+
 
 var HoverMixin = {
     getInitialState: function() {
@@ -54,10 +56,12 @@ var Note = component('Note', HoverMixin, function(props) {
 
     var handleDelete = () => {
         console.log("Should delete note:", note.toJS());
+        actions.deleteNote(note.get('id'), note.get('revision'));
     };
 
     var handleEdit = () => {
         console.log("Should edit note:", note.toJS());
+        // actions.editNote(note.get('id'), note.get('revision'), TODO);
     };
 
     return (
