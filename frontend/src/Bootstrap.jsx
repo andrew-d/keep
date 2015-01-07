@@ -10,14 +10,11 @@ var App = require('./scripts/App'),
 
 
 var rerender = function rerender(structure, el) {
-    var Handler, state;
-    var render = function render(h, s) {
-        // TODO: this is b0rked
-        /////if (h) Handler = h;
-        if (!Handler) Handler = h;
-        if (s) state = s;
+    var Handler;
+    var render = function render(h) {
+        if (h) Handler = h;
 
-        React.render(<Handler cursor={structure.cursor()} statics={state} />, el);
+        React.render(<Handler cursor={structure.cursor()} />, el);
     };
 
     // Only rerender on requestAnimationFrame.
@@ -28,7 +25,9 @@ var rerender = function rerender(structure, el) {
 
         requestAnimationFrame(function() {
             queuedChange = false;
-            // TODO: arguments?
+
+            // Note: we call this without arguments so as to use the existing
+            // saved Handler.
             render();
         });
     });
